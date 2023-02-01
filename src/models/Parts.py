@@ -7,6 +7,7 @@ class Part(db.Model):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable = False, unique=True)
+    number = Column(Integer, nullable=False, unique=True)
     japanese_name = Column(String(100), nullable = False, unique=True)
     romanization_name = Column(String(100), nullable = False, unique=True)
     alther_name = Column(String(100))

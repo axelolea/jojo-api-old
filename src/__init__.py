@@ -2,6 +2,7 @@ from flask import Flask
 from os import environ
 from src.utils.database import db
 from src.routes.stands import stands
+from src.routes.parts import parts
 
 def create_app(test_config = None):
 
@@ -22,5 +23,6 @@ def create_app(test_config = None):
     db.init_app(app)
 
     app.register_blueprint(stands)
+    app.register_blueprint(parts)
 
     return app
