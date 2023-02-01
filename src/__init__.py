@@ -1,6 +1,7 @@
 from flask import Flask
 from os import environ
 from src.utils.database import db
+from src.routes.stands import stands
 
 def create_app(test_config = None):
 
@@ -19,9 +20,7 @@ def create_app(test_config = None):
     # Config database
     db.app = app
     db.init_app(app)
-    @app.route('/api')
-    def api():
-        return {
-            'hola': 'hola jojoero'
-        }
+
+    app.register_blueprint(stands)
+
     return app
