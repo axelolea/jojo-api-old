@@ -1,8 +1,11 @@
 from flask import Flask
 from os import environ
 from src.utils.database import db
+# Routes
+from src.routes.characthers import characters
 from src.routes.stands import stands
 from src.routes.parts import parts
+from src.routes.countries import countries
 
 def create_app(test_config = None):
 
@@ -22,7 +25,9 @@ def create_app(test_config = None):
     db.app = app
     db.init_app(app)
 
+    app.register_blueprint(characters)
     app.register_blueprint(stands)
     app.register_blueprint(parts)
+    app.register_blueprint(countries)
 
     return app
