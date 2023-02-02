@@ -2,7 +2,7 @@
 .flaskenv
 venv
 instance
-__pycache__
+/__pycache__/
 notes.txt
 migrations
 *.pyc

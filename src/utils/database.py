@@ -3,6 +3,27 @@ from sqlalchemy import Column, Integer, String, Boolean, Text, Table, ForeignKey
 
 db = SQLAlchemy()
 
+# Many to many raltion tables 
+
+character_stand = db.Table(
+    'character_stand_table',
+    Column('character_id', Integer, ForeignKey('characters_table.id'), primary_key=True),
+    Column('stand_id', Integer, ForeignKey('stands_table.id'), primary_key=True)
+)
+
+character_part = db.Table(
+    'character_part_table',
+    Column('character_id', Integer, ForeignKey('characters_table.id'), primary_key=True),
+    Column('part_id', Integer, ForeignKey('parts_table.id'), primary_key=True)
+)
+
+stand_part = db.Table(
+    'stand_part_table',
+    Column('stand_id', Integer, ForeignKey('stands_table.id'), primary_key=True),
+    Column('part_id', Integer, ForeignKey('parts_table.id'), primary_key=True)
+)
+
+
 class Character(db.Model):
     
     __tablename__ = 'characters_table'
@@ -17,9 +38,10 @@ class Character(db.Model):
     is_human = Column(Boolean, nullable = False)
     country_id = Column(ForeignKey('countries_table.id'))
     images_id = Column(ForeignKey('images_table.id'))
-    # stands = db.relationship('Stand', secondary = characters_stands, backref='characters')
+    stand_user = db.relationship('Stand', secondary = character_stand , backref='users')
+
     def __repr__(self) -> str:
-        return repr('Character', self.name)
+        return format_repr('Character', self.name)
 
 
 class Country(db.Model):
@@ -31,7 +53,7 @@ class Country(db.Model):
     country_code = Column(String(2), nullable = False)
 
     def __repr__(self) -> str:
-        return repr('Country', self.country_code)
+        return format_repr('Country', self.country_code)
 
 
 class Image(db.Model):
@@ -58,7 +80,7 @@ class Part(db.Model):
     alther_name = Column(String(100))
 
     def __repr__(self) -> str:
-        return repr('Part', self.name)
+        return format_repr('Part', self.name)
 
 
 class Stand(db.Model):
@@ -72,10 +94,10 @@ class Stand(db.Model):
     abilities = Column(Text, nullable = False)
     battlecry = Column(String(120))
     images_id = Column(Integer, ForeignKey('images_table.id'))
-    # stands = db.relationship('Character', secondary = characters_stands, backref='stands')
+    user_stand = db.relationship('Character', secondary = character_stand , backref='stands', viewonly=True)
 
     def __repr__(self) -> str:
-        return repr('Stand', self.name)
+        return format_repr('Stand', self.name)
 
 
 class Stats(db.Model):
@@ -96,25 +118,6 @@ class Stats(db.Model):
 
 
 
-# Many to many raltion tables 
-
-character_stand = db.Table(
-    'character_stand_table',
-    Column('character_id', Integer, ForeignKey('characters_table.id'), primary_key=True),
-    Column('stand_id', Integer, ForeignKey('stands_table.id'), primary_key=True)
-)
-
-character_part = db.Table(
-    'character_part_table',
-    Column('character_id', Integer, ForeignKey('characters_table.id'), primary_key=True),
-    Column('part_id', Integer, ForeignKey('parts_table.id'), primary_key=True)
-)
-
-stand_part = db.Table(
-    'stand_part_table',
-    Column('stand_id', Integer, ForeignKey('stands_table.id'), primary_key=True),
-    Column('part_id', Integer, ForeignKey('parts_table.id'), primary_key=True)
-)
 
 
 # Format class __repr__
