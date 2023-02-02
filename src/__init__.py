@@ -1,6 +1,10 @@
 from flask import Flask
 from os import environ
+from flask_migrate import Migrate
+
+# Database 
 from src.utils.database import db
+
 # Routes
 from src.routes.characthers import characters
 from src.routes.stands import stands
@@ -24,6 +28,8 @@ def create_app(test_config = None):
     # Config database
     db.app = app
     db.init_app(app)
+
+    migrate = Migrate(app, db)
 
     app.register_blueprint(characters)
     app.register_blueprint(stands)

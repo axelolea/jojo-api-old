@@ -1,6 +1,5 @@
 from flask import Blueprint, jsonify, request
-from src.utils.database import db
-from src.models.Characters import Character
+from src.utils.database import db, Character
 from src.constants.http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
 from src.constants.default_params import INITIAL_PAGE, DEFAULT_CHARACTERS_PER_PAGE, MIN_CHARACTERS_PER_PAGE, MAX_CHARACTERS_PER_PAGE

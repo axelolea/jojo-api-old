@@ -1,6 +1,5 @@
 from flask import Blueprint, jsonify, request
-from src.utils.database import db
-from src.models.Parts import Part
+from src.utils.database import db, Part
 from src.constants.http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 from src.logic.list_content import list_part
 
