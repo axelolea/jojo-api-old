@@ -22,8 +22,8 @@ def get_parts():
 def post_country():
 
     # Get params in body 
-    name = request.json.get('name', None)
-    code = request.json.get('code', None)
+    name = request.json.get('name', None).upper()
+    code = request.json.get('code', None).upper()
     # Valid content data in params 
     if not (name and code):
         return jsonify({
@@ -42,8 +42,6 @@ def post_country():
         return jsonify({
         'message': 'La nacionalidad ya fue creada'
         }), HTTP_400_BAD_REQUEST
-    # Upper the code
-    code = code.upper()
     # Create country obj 
     country = Country(country_name = name, country_code = code)
     # Add obj Coutry in database 

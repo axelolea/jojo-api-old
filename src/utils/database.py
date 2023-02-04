@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String, Boolean, Text, Table, ForeignKey
 
+# Connection Database
 db = SQLAlchemy()
 
 # Many to many raltion tables 
@@ -33,12 +34,23 @@ class Character(db.Model):
     alther_name = Column(String(100))
     japanese_name = Column(String(100), nullable = False)
     catchphrase = Column(String(200))
+    is_hamon_user = Column(Boolean, nullable = False)
     is_stand_user = Column(Boolean, nullable = False)
+    is_gyro_user = Column(Boolean, nullable = False)
     living = Column(Boolean)
     is_human = Column(Boolean, nullable = False)
     country_id = Column(ForeignKey('countries_table.id'))
     images_id = Column(ForeignKey('images_table.id'))
-    stand_user = db.relationship('Stand', secondary = character_stand , backref='users')
+
+    # One to One relationships
+
+    user_images = db.relationship('Image', back_populates = 'character_images')
+    user_country = db.relationship('Country', back_populates = 'character_country')
+
+    # Many to many relationships
+
+    user_stands = db.relationship('Stand', secondary = character_stand , backref='users')
+    user_parts = db.relationship('Part', secondary = character_part , backref='users')
 
     def __repr__(self) -> str:
         return format_repr('Character', self.name)
@@ -52,6 +64,9 @@ class Country(db.Model):
     country_name = Column(String(50), nullable = False)
     country_code = Column(String(2), nullable = False)
 
+    # One to one relationships 
+    character_country = db.relationship('Character', back_populates = 'user_country')
+
     def __repr__(self) -> str:
         return format_repr('Country', self.country_code)
 
@@ -63,9 +78,14 @@ class Image(db.Model):
     id = Column(Integer, primary_key=True, unique=True, autoincrement=True)
     half_body = Column(Text, nullable = False)
     full_body = Column(Text)
-    
+
+    # One to one relationship 
+
+    character_images = db.relationship('Character', back_populates = 'user_images')
+
+
     def __repr__(self) -> str:
-        return repr('Image', self.id)
+        return format_repr('Image', self.id)
 
 
 class Part(db.Model):
@@ -79,6 +99,11 @@ class Part(db.Model):
     romanization_name = Column(String(100), nullable = False, unique=True)
     alther_name = Column(String(100))
 
+    # Many to many relationship 
+
+    part_users = db.relationship('Character', secondary = character_part , backref='parts', viewonly=True)
+    part_stands = db.relationship('Stand', secondary = stand_part , backref='parts', viewonly=True)
+    
     def __repr__(self) -> str:
         return format_repr('Part', self.name)
 
@@ -94,7 +119,11 @@ class Stand(db.Model):
     abilities = Column(Text, nullable = False)
     battlecry = Column(String(120))
     images_id = Column(Integer, ForeignKey('images_table.id'))
-    user_stand = db.relationship('Character', secondary = character_stand , backref='stands', viewonly=True)
+
+    # Many to many relationship 
+
+    stand_users = db.relationship('Character', secondary = character_stand , backref='stands', viewonly=True)
+    stand_parts = db.relationship('Part', secondary = stand_part , backref='stands')
 
     def __repr__(self) -> str:
         return format_repr('Stand', self.name)
