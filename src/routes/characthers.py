@@ -68,10 +68,12 @@ def post_character():
     # Validators 
 
     # Extremely required name and japanese version 
+
     if not (name and japanese_name):
         return jsonify({
         'message': 'Faltan nombres del personajes, son requeridos el nombre y su version en katakana o kanji'
         }), HTTP_400_BAD_REQUEST
+    
     # Required parts in aparication 
     if not parts:
         return jsonify({
@@ -125,20 +127,24 @@ def post_character():
     flag = False
     if images:
         img = Image()
-        if not url(images.get('half_body', '')):
-            return jsonify({
-                'message': 'Invalid < half_body > url'
-                }), HTTP_400_BAD_REQUEST
-        else:
-            flag = True
-            img.half_body = images.get('half_body')
-        if not url(images.get('full_body', '')):
-            return jsonify({
-                'message': 'Invalid "full_body" url'
-                }), HTTP_400_BAD_REQUEST
-        else:
-            flag = True
-            img.full_body = images.get('full_body')
+        # check this is exist the full body image 
+        if images.get('full_body', None):
+            if not url(images.get('full_body', '')):
+                return jsonify({
+                    'message': 'Invalid "full_body" url'
+                    }), HTTP_400_BAD_REQUEST
+            else:
+                flag = True
+                img.full_body = images.get('full_body')
+        # check this is exist the full half image 
+        if images.get('half_body', None):
+            if not url(images.get('half_body', '')):
+                return jsonify({
+                    'message': 'Invalid < half_body > url'
+                    }), HTTP_400_BAD_REQUEST
+            else:
+                flag = True
+                img.half_body = images.get('half_body')
 
 
     # Set values or default 

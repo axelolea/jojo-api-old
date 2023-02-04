@@ -36,7 +36,7 @@ def list_characters(item):
 
 def list_country(item):
     return {
-        'id': item.id,
+        'country_id': item.id,
         'country_name': item.country_name,
         'country_code': item.country_code
     }
