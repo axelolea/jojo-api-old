@@ -1,6 +1,6 @@
 # List Content Parts 
 
-def list_image(item):
+def list_images(item):
     return {
         'half_body': item.half_body,
         'full_body': item.full_body
@@ -36,7 +36,7 @@ def list_characters(item):
         'living': item.living,
         'is_human': item.is_human,
         'country': list_country(item.country_r) if item.country_r else None,
-        'images': list_image(item.images_r) if item.images_r else None,
+        'images': list_images(item.images_r) if item.images_r else None,
         'parts': [ i.number for i in item.parts_r]
     }
 
@@ -47,3 +47,14 @@ def list_country(item):
         'country_name': item.country_name,
         'country_code': item.country_code
     }
+
+def list_pagination(item):
+    return {
+            'page': item.page,
+            'pages': item.pages,
+            'total_count': item.total,
+            'prev': item.prev_num,
+            'next': item.next_num,
+            'has_prev': item.has_prev,
+            'has_next': item.has_next,
+            }

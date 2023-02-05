@@ -3,12 +3,13 @@ from src.utils.database import db, Character, Image, Part
 from src.constants.http_status_codes import (
     HTTP_200_OK,
     HTTP_201_CREATED,
-    HTTP_400_BAD_REQUEST, 
-    HTTP_404_NOT_FOUND)
-from src.logic.list_content import list_characters
+    HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
+    HTTP_500_INTERNAL_SERVER_ERROR)
+from src.logic.list_content import list_characters, list_images, list_pagination
 from src.constants.default_values import (
-    INITIAL_PAGE, 
-    DEFAULT_CHARACTERS_PER_PAGE, 
+    INITIAL_PAGE,
+    DEFAULT_CHARACTERS_PER_PAGE,
     MIN_CHARACTERS_PER_PAGE, 
     MAX_CHARACTERS_PER_PAGE,
     PARTS_IN_JOJOS)
@@ -18,18 +19,26 @@ from src.logic.custom_validators import validate_country, validate_images
 characters = Blueprint('characters', __name__, url_prefix = '/api/v1/characters')
 
 
-@characters.get('/')
+@characters.get('')
 def get_characters():
 
     page = request.args.get('page', INITIAL_PAGE, type=int)
-    per_page = request.args.get('page', DEFAULT_CHARACTERS_PER_PAGE, type=int)
-
-    characters_data = Character.query.all.paginate(page = page, per_page = per_page)
-
+    per_page = request.args.get('per_page', DEFAULT_CHARACTERS_PER_PAGE, type=int)
+    print(page, per_page)
+    characters_data = Character.query.paginate(page = page, per_page = per_page)
     data = list()
 
+    for item in characters_data:
+        data.append({
+            'id': item.id,
+            'name': item.name,
+            'images': list_images(item.images_r) if item.images_r else None,
+        })
+
     return jsonify({
-        'message': 'hola'
+        'message': 'hola',
+        'data': data,
+        'pagination': list_pagination(characters_data)
         }), HTTP_200_OK
 
 
@@ -45,7 +54,7 @@ def get_character_id(id):
         }), HTTP_200_OK
 
 
-@characters.post('/')
+@characters.post('')
 def post_character():
     # <-- Params will created a character -->
     # +---------------+----------+----------+-----------------------------------------------
@@ -54,8 +63,9 @@ def post_character():
     # | name          | str      | True     | Alphanumeric name
     # | alther_name   | str      | False    | Alther name (for CR Claim. etc)
     # | japanese_name | str      | True     | Name in katakana or kanji
-    # | catchphrase   | str      | False    | Frecuency Use Slogan 
+    # | parts         | list     | True     | List part aparization
     # | living        | bool     | True     | Is actual living character, skip reset universe of Pucchi
+    # | catchphrase   | str      | False    | Frecuency Use Slogan 
     # | is_human      | bool     | False    | Is human character 
     # | country_id    | int/str  | False    | Response a section with id country or code
     # | images        | dict/obj | False    | Response with dictionary with contain a 2 min images
@@ -64,7 +74,6 @@ def post_character():
     #               "half_body" url with image [str] [null]
     #               "full_body" url with image [str] [null]
     #           }
-    # parts -> list with numbers the part aparition [list][required]
 
     try:
         # Body with data params 
@@ -77,8 +86,6 @@ def post_character():
         parts = body.get('parts', None)
 
         # Clean list parts 
-        # ToDO validad parts is iterable
-        parts = [ i for i in parts if (type(i) is int and i in range(1, PARTS_IN_JOJOS + 1))]
 
         # <-- Validators -->
         # Extremely required name and japanese version 
@@ -88,9 +95,16 @@ def post_character():
         if not parts:
             raise ValueError('Las partes de aparicion no existen')
         # Required parts in aparication
-        if not (isinstance(parts, list) and all(parts)):
+        if not (isinstance(parts, list)):
             raise ValueError('Las partes deben estar listadas')
 
+        # ToDO validad parts is iterable
+        parts = [ i for i in parts if (type(i) is int and i in range(1, PARTS_IN_JOJOS + 1))]
+        print(parts)
+        if not (all(parts) and len(parts) > 0):
+            raise ValueError('Los valores en la lista son incorrectos')
+
+        # Get Country 
         country = body.get('country', None)
 
         # Validar nacionalidad
@@ -121,13 +135,23 @@ def post_character():
         is_human = body.get('is_human', True)
         living = body.get('living', True)
 
-        # Set values or Null 
+        if not isinstance(is_hamon_user, bool):
+            raise ValueError('Param "is_hamon_user" not boolean value')
+        if not isinstance(is_gyro_user, bool):
+            raise ValueError('Param "is_gyro_user" not boolean value')
+        if not isinstance(is_stand_user, bool):
+            raise ValueError('Param "is_stand_user" not boolean value')
+        if not isinstance(is_human, bool):
+            raise ValueError('Param "is_human" not boolean value')
+        if not isinstance(living, bool):
+            raise ValueError('Param "living" not boolean value')
 
+
+        # Set values or Null 
         alther_name = body.get('alther_name', None)
         catchphrase = body.get('catchphrase', None)
 
         # Create Character 
-
         character = Character(
             name = name,
             alther_name = alther_name,
@@ -163,7 +187,12 @@ def post_character():
         'message': e.args[0],
         "error": 'Uno de los parametros es incorrecto',
         }), HTTP_400_BAD_REQUEST
-
+    # except:
+    #     return jsonify({
+    #     'status': 500,
+    #     'type': 'ServerError',
+    #     "error": 'Problemas internos D:',
+    #     }), HTTP_500_INTERNAL_SERVER_ERROR
     # <-- Send data of character created and status 201 [Created] -->
     else:
         return jsonify({
