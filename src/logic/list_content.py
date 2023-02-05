@@ -7,6 +7,12 @@ def list_image(item):
     }
 
 
+def list_parts(item):
+    return {
+
+    }
+
+
 def list_part(item):
     return {
         'id': item.id,
@@ -29,8 +35,9 @@ def list_characters(item):
         'is_gyro_user': item.is_gyro_user,
         'living': item.living,
         'is_human': item.is_human,
-        'country': list_country(item.user_country) if item.country_id else None,
-        'images': list_image(item.user_images) if item.images_id else None,
+        'country': list_country(item.country_r) if item.country_r else None,
+        'images': list_image(item.images_r) if item.images_r else None,
+        'parts': [ i.number for i in item.parts_r]
     }
 
 
