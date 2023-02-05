@@ -44,13 +44,13 @@ class Character(db.Model):
 
     # One to One relationships
 
-    user_images = db.relationship('Image', back_populates = 'character_images')
-    user_country = db.relationship('Country', back_populates = 'character_country')
+    images_r = db.relationship('Image', back_populates = 'characters_r')
+    country_r = db.relationship('Country', back_populates = 'characters_r')
 
     # Many to many relationships
 
-    user_stands = db.relationship('Stand', secondary = character_stand , backref='users')
-    user_parts = db.relationship('Part', secondary = character_part , backref='users')
+    stands_r = db.relationship('Stand', secondary = character_stand , backref='users')
+    parts_r = db.relationship('Part', secondary = character_part , backref='users')
 
     def __repr__(self) -> str:
         return format_repr('Character', self.name)
@@ -65,7 +65,7 @@ class Country(db.Model):
     country_code = Column(String(2), nullable = False)
 
     # One to one relationships 
-    character_country = db.relationship('Character', back_populates = 'user_country')
+    characters_r = db.relationship('Character', back_populates = 'country_r')
 
     def __repr__(self) -> str:
         return format_repr('Country', self.country_code)
@@ -81,7 +81,7 @@ class Image(db.Model):
 
     # One to one relationship 
 
-    character_images = db.relationship('Character', back_populates = 'user_images')
+    characters_r = db.relationship('Character', back_populates = 'images_r')
 
 
     def __repr__(self) -> str:
@@ -101,8 +101,8 @@ class Part(db.Model):
 
     # Many to many relationship 
 
-    part_users = db.relationship('Character', secondary = character_part , backref='parts', viewonly=True)
-    part_stands = db.relationship('Stand', secondary = stand_part , backref='parts', viewonly=True)
+    users_r = db.relationship('Character', secondary = character_part , backref='parts', viewonly=True)
+    stands_r = db.relationship('Stand', secondary = stand_part , backref='parts', viewonly=True)
     
     def __repr__(self) -> str:
         return format_repr('Part', self.name)
@@ -122,8 +122,8 @@ class Stand(db.Model):
 
     # Many to many relationship 
 
-    stand_users = db.relationship('Character', secondary = character_stand , backref='stands', viewonly=True)
-    stand_parts = db.relationship('Part', secondary = stand_part , backref='stands')
+    users_r = db.relationship('Character', secondary = character_stand , backref='stands', viewonly=True)
+    parts_r = db.relationship('Part', secondary = stand_part , backref='stands')
 
     def __repr__(self) -> str:
         return format_repr('Stand', self.name)

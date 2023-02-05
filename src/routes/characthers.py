@@ -1,13 +1,20 @@
 from flask import Blueprint, jsonify, request
-from src.utils.database import db, Character, Country, Image
-from src.constants.http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
-
-from validators import url
-
+from src.utils.database import db, Character, Image, Part
+from src.constants.http_status_codes import (
+    HTTP_200_OK,
+    HTTP_201_CREATED,
+    HTTP_400_BAD_REQUEST, 
+    HTTP_404_NOT_FOUND)
 from src.logic.list_content import list_characters
+from src.constants.default_values import (
+    INITIAL_PAGE, 
+    DEFAULT_CHARACTERS_PER_PAGE, 
+    MIN_CHARACTERS_PER_PAGE, 
+    MAX_CHARACTERS_PER_PAGE,
+    PARTS_IN_JOJOS)
+from src.logic.custom_validators import validate_country, validate_images
 
-from src.constants.default_params import INITIAL_PAGE, DEFAULT_CHARACTERS_PER_PAGE, MIN_CHARACTERS_PER_PAGE, MAX_CHARACTERS_PER_PAGE
-
+# Create Blueprint 
 characters = Blueprint('characters', __name__, url_prefix = '/api/v1/characters')
 
 
@@ -40,151 +47,127 @@ def get_character_id(id):
 
 @characters.post('/')
 def post_character():
-    # Params:
-    # name -> Alphanumeric name [Required][str]
-    # alther_name -> Alther name (for CR Claim. etc) [Null][str]
-    # japanese_name -> Name in katakana or kanji [required][str]
-    # catchphrase -> Frecuency Use Slogan [Null][str]
-    # living -> Is actual living character, skip reset universe of Pucchi [requiered][bool]
-    # is_human -> Is human character [bool][true]
-    # country_id -> Response a section with id country or code [null][int or str(2)]
-    # images -> response with dictionary with contain a 2 min images [dict][null]
+    # <-- Params will created a character -->
+    # +---------------+----------+----------+-----------------------------------------------
+    # | Params        | Type     | Required | Description
+    # +---------------+----------+----------+-----------------------------------------------
+    # | name          | str      | True     | Alphanumeric name
+    # | alther_name   | str      | False    | Alther name (for CR Claim. etc)
+    # | japanese_name | str      | True     | Name in katakana or kanji
+    # | catchphrase   | str      | False    | Frecuency Use Slogan 
+    # | living        | bool     | True     | Is actual living character, skip reset universe of Pucchi
+    # | is_human      | bool     | False    | Is human character 
+    # | country_id    | int/str  | False    | Response a section with id country or code
+    # | images        | dict/obj | False    | Response with dictionary with contain a 2 min images
+    # +---------------|----------|----------|------------------------------------------------|
     #           {
     #               "half_body" url with image [str] [null]
     #               "full_body" url with image [str] [null]
     #           }
     # parts -> list with numbers the part aparition [list][required]
 
-    # Body with data params 
-    body = request.json
+    try:
+        # Body with data params 
+        body = request.json
 
-    # Required params 
+        # Required params 
 
-    name = body.get('name', None)
-    japanese_name = body.get('japanese_name', None)
-    parts = body.get('parts', None)
-    # Clean list parts 
-    parts = [ i for i in parts if (type(i) is int and i in range(0, 9))]
-    # Validators 
+        name = body.get('name', None)
+        japanese_name = body.get('japanese_name', None)
+        parts = body.get('parts', None)
 
-    # Extremely required name and japanese version 
+        # Clean list parts 
+        # ToDO validad parts is iterable
+        parts = [ i for i in parts if (type(i) is int and i in range(1, PARTS_IN_JOJOS + 1))]
 
-    if not (name and japanese_name):
-        return jsonify({
-        'message': 'Faltan nombres del personajes, son requeridos el nombre y su version en katakana o kanji'
-        }), HTTP_400_BAD_REQUEST
-    
-    # Required parts in aparication 
-    if not parts:
-        return jsonify({
-        'message': 'Falta lista con las partes de aparicion'
-        }), HTTP_400_BAD_REQUEST
-    elif not (isinstance(parts, list) and all(parts)):
-        return jsonify({
-        'message': 'Las partes deben estar listadas'
-        }), HTTP_400_BAD_REQUEST
+        # <-- Validators -->
+        # Extremely required name and japanese version 
 
-    country = body.get('country', None)
+        if not (name and japanese_name):
+            raise ValueError('El nombre, original y kanji no existen')
+        if not parts:
+            raise ValueError('Las partes de aparicion no existen')
+        # Required parts in aparication
+        if not (isinstance(parts, list) and all(parts)):
+            raise ValueError('Las partes deben estar listadas')
 
-    # Validar nacionalidad
-    if body.get('country'):
-        # Es alfabetico (Code or name)
-        if isinstance(body.get('country'), str):
-            if len(body.get('country')) == 2:
-                country = Country.query.filter_by(
-                        country_code = body.get('country').upper()
-                    ).first()
-                if not country:
-                    return jsonify({
-                    'message': 'Invalid code country'
-                    }), HTTP_400_BAD_REQUEST
-            else:
-                country = Country.query.filter_by(
-                        country_name = body.get('country').upper()
-                    ).first()
-                if not country:
-                    return jsonify({
-                    'message': 'Invalid name country'
-                    }), HTTP_400_BAD_REQUEST
-        # Es numerico (Id)
-        elif isinstance(body.get('country'), int):
-            country = Country.query.filter_by(
-                    id = body.get('country')
-                ).first()
+        country = body.get('country', None)
+
+        # Validar nacionalidad
+        if country:
+            country, msg = validate_country(country)
             if not country:
-                return jsonify({
-                'message': 'Invalid ID country'
-                }), HTTP_400_BAD_REQUEST
-        # Invalid Country 
-        else:
-            return jsonify({
-                'message': 'Invalid country'
-                }), HTTP_400_BAD_REQUEST
+                raise ValueError(msg)
 
-    # Get params with create character
+        # Get params with create character
 
-    images = body.get('images', None)
-    flag = False
-    if images:
-        img = Image()
-        # check this is exist the full body image 
-        if images.get('full_body', None):
-            if not url(images.get('full_body', '')):
-                return jsonify({
-                    'message': 'Invalid "full_body" url'
-                    }), HTTP_400_BAD_REQUEST
+        images = body.get('images', None)
+
+        # Validate images 
+        if images:
+            images, msg = validate_images(images)
+            if not images:
+                raise ValueError(msg)
             else:
-                flag = True
-                img.full_body = images.get('full_body')
-        # check this is exist the full half image 
-        if images.get('half_body', None):
-            if not url(images.get('half_body', '')):
-                return jsonify({
-                    'message': 'Invalid < half_body > url'
-                    }), HTTP_400_BAD_REQUEST
-            else:
-                flag = True
-                img.half_body = images.get('half_body')
+                images = Image(full_body = images.get('full_body'), half_body = images.get('half_body'))
+                db.session.add(images)
+                db.session.commit()
 
+        # Set values or default values
 
-    # Set values or default 
+        is_hamon_user = body.get('is_hamon_user', False)
+        is_stand_user = body.get('is_stand_user', False)
+        is_gyro_user = body.get('is_gyro_user', False)
+        is_human = body.get('is_human', True)
+        living = body.get('living', True)
 
-    is_hamon_user = body.get('is_hamon_user', False)
-    is_stand_user = body.get('is_stand_user', False)
-    is_gyro_user = body.get('is_gyro_user', False)
-    is_human = body.get('is_human', True)
-    living = body.get('living', True)
+        # Set values or Null 
 
-    # Set values or Null 
+        alther_name = body.get('alther_name', None)
+        catchphrase = body.get('catchphrase', None)
 
-    alther_name = body.get('alther_name', None)
-    catchphrase = body.get('catchphrase', None)
+        # Create Character 
 
-    # Create Character 
+        character = Character(
+            name = name,
+            alther_name = alther_name,
+            japanese_name = japanese_name,
+            catchphrase = catchphrase,
+            is_hamon_user = is_hamon_user,
+            is_stand_user = is_stand_user,
+            is_gyro_user = is_gyro_user,
+            living = living,
+            is_human = is_human
+        )
 
-    character = Character(
-        name = name,
-        alther_name = alther_name,
-        japanese_name = japanese_name,
-        catchphrase = catchphrase,
-        is_hamon_user = is_hamon_user,
-        is_stand_user = is_stand_user,
-        is_gyro_user = is_gyro_user,
-        living = living,
-        is_human = is_human
-    )
+        if country:
+            character.country_id = country.id
+        if images.id:
+            character.images_id = images.id
+        # Append character with parts 
+        for number in parts:
+            part = Part.query.filter_by(number = number).first()
+            character.parts_r.append(part)
 
-    if country:
-        character.country_id = country.id
-    if flag:
-        db.session.add(img)
+        # Add Character in database
+        db.session.add(character)
         db.session.commit()
-        character.images_id = img.id
-    # Add obj Coutry in database 
-    db.session.add(character)
-    db.session.commit()
+            
+    # <-- Exception Manager -->
 
-    return jsonify({
-        'message': f'Character: {character.name} is created successfully',
-        'data': list_characters(character)
-        }), HTTP_201_CREATED
+    # <-- Value of params is invalid, Exception ( message ) -->
+    except ValueError as e:
+        return jsonify({
+        'status': 400,
+        'type': type(e).__name__,
+        'message': e.args[0],
+        "error": 'Uno de los parametros es incorrecto',
+        }), HTTP_400_BAD_REQUEST
+
+    # <-- Send data of character created and status 201 [Created] -->
+    else:
+        return jsonify({
+            'status': 201,
+            'message': f'Character: {character.name} is created successfully',
+            'data': list_characters(character)
+            }), HTTP_201_CREATED
