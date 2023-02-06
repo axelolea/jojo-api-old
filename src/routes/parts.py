@@ -6,7 +6,7 @@ from src.logic.list_content import list_part
 parts = Blueprint('parts', __name__, url_prefix = '/api/v1/parts')
 
 
-@parts.get('/')
+@parts.get('')
 def get_parts():
     parts_data = Part.query.all()
     parts_list = list()
@@ -27,30 +27,43 @@ def get_part_id(id):
         'data': list_part(part)
         }), HTTP_200_OK
 
-@parts.post('/')
+@parts.post('')
 def post_parts():
-    name = request.get_json().get('name', None)
-    number = request.get_json().get('number', None)
-    japanese_name = request.get_json().get('japanese_name', None)
-    romanization_name = request.get_json().get('romanization_name', None)
-    alther_name = request.get_json().get('alther_name', None)
-    if not (name and number and japanese_name and romanization_name):
+    try:
+        name = request.get_json().get('name', None)
+        number = request.get_json().get('number', None)
+        japanese_name = request.get_json().get('japanese_name', None)
+        romanization_name = request.get_json().get('romanization_name', None)
+        alther_name = request.get_json().get('alther_name', None)
+        if not (name and number and japanese_name and romanization_name):
+            return jsonify({
+                'error': 'Faltan parametros'
+            }), HTTP_400_BAD_REQUEST
+        
+        if not (type(number) == int):
+            raise ValueError('Number is not integer value')
+
+        part = Part(
+                    name = name,
+                    number = number,
+                    japanese_name = japanese_name,
+                    romanization_name = romanization_name,
+                    alther_name = alther_name
+                )
+        db.session.add(part)
+        db.session.commit()
+    except ValueError as e:
         return jsonify({
-            'error': 'Faltan parametros'
-        }), HTTP_400_BAD_REQUEST
-    part = Part(
-                name = name,
-                number = number,
-                japanese_name = japanese_name,
-                romanization_name = romanization_name,
-                alther_name = alther_name
-            )
-    db.session.add(part)
-    db.session.commit()
-    return jsonify({
-        'message': 'Post part created successfully',
-        'data': {
-            'name': part.name,
-            'number': part.number
-        }
-    }), HTTP_201_CREATED
+                'status': 400,
+                'type': type(e).__name__,
+                'message': e.args[0],
+                'error': 'Uno de los parametros es incorrecto',
+            }), HTTP_400_BAD_REQUEST
+    else:
+        return jsonify({
+            'message': 'Post part created successfully',
+            'data': {
+                'name': part.name,
+                'number': part.number
+            }
+        }), HTTP_201_CREATED

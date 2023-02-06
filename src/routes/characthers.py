@@ -13,7 +13,7 @@ from src.constants.default_values import (
     MIN_CHARACTERS_PER_PAGE, 
     MAX_CHARACTERS_PER_PAGE,
     PARTS_IN_JOJOS)
-from src.logic.custom_validators import validate_country, validate_images
+from src.logic.custom_validators import validate_country, validate_images, validate_list_type
 
 # Create Blueprint 
 characters = Blueprint('characters', __name__, url_prefix = '/api/v1/characters')
@@ -21,25 +21,33 @@ characters = Blueprint('characters', __name__, url_prefix = '/api/v1/characters'
 
 @characters.get('')
 def get_characters():
+    try:
+        page = request.args.get('page', INITIAL_PAGE, type=int)
+        per_page = request.args.get('per_page', DEFAULT_CHARACTERS_PER_PAGE, type=int)
+        if not (per_page in range(MIN_CHARACTERS_PER_PAGE, MAX_CHARACTERS_PER_PAGE)):
+            raise ValueError('Per Page is out of limit range')
+        characters_data = Character.query.paginate(page = page, per_page = per_page)
+        data = list()
 
-    page = request.args.get('page', INITIAL_PAGE, type=int)
-    per_page = request.args.get('per_page', DEFAULT_CHARACTERS_PER_PAGE, type=int)
-    print(page, per_page)
-    characters_data = Character.query.paginate(page = page, per_page = per_page)
-    data = list()
+        for item in characters_data:
+            data.append({
+                'id': item.id,
+                'name': item.name,
+                'images': list_images(item.images_r) if item.images_r else None,
+            })
 
-    for item in characters_data:
-        data.append({
-            'id': item.id,
-            'name': item.name,
-            'images': list_images(item.images_r) if item.images_r else None,
-        })
-
-    return jsonify({
-        'message': 'hola',
-        'data': data,
-        'pagination': list_pagination(characters_data)
-        }), HTTP_200_OK
+        return jsonify({
+            'message': 'hola',
+            'data': data,
+            'pagination': list_pagination(characters_data)
+            }), HTTP_200_OK
+    except ValueError as e:
+        return jsonify({
+            'status': 400,
+            'type': type(e).__name__,
+            'message': e.args[0],
+            "error": 'Uno de los parametros es incorrecto',
+            }), HTTP_400_BAD_REQUEST
 
 
 @characters.get('/<int:id>')
@@ -100,7 +108,7 @@ def post_character():
 
         # ToDO validad parts is iterable
         parts = [ i for i in parts if (type(i) is int and i in range(1, PARTS_IN_JOJOS + 1))]
-        print(parts)
+
         if not (all(parts) and len(parts) > 0):
             raise ValueError('Los valores en la lista son incorrectos')
 
@@ -134,18 +142,8 @@ def post_character():
         is_gyro_user = body.get('is_gyro_user', False)
         is_human = body.get('is_human', True)
         living = body.get('living', True)
-
-        if not isinstance(is_hamon_user, bool):
-            raise ValueError('Param "is_hamon_user" not boolean value')
-        if not isinstance(is_gyro_user, bool):
-            raise ValueError('Param "is_gyro_user" not boolean value')
-        if not isinstance(is_stand_user, bool):
-            raise ValueError('Param "is_stand_user" not boolean value')
-        if not isinstance(is_human, bool):
-            raise ValueError('Param "is_human" not boolean value')
-        if not isinstance(living, bool):
-            raise ValueError('Param "living" not boolean value')
-
+        
+        validate_list_type([is_hamon_user,is_stand_user,is_gyro_user,is_human,living], bool)
 
         # Set values or Null 
         alther_name = body.get('alther_name', None)
@@ -185,8 +183,9 @@ def post_character():
         'status': 400,
         'type': type(e).__name__,
         'message': e.args[0],
-        "error": 'Uno de los parametros es incorrecto',
+        'error': 'Uno de los parametros es incorrecto',
         }), HTTP_400_BAD_REQUEST
+    # <-- General exception error return -->
     # except:
     #     return jsonify({
     #     'status': 500,
