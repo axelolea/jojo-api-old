@@ -7,7 +7,7 @@ from src.logic.list_content import list_country
 countries = Blueprint('countries', __name__, url_prefix = '/api/v1/countries')
 
 
-@countries.get('/')
+@countries.get('')
 def get_parts():
     countries_data = Country.query.all()
     countries_list = list()
@@ -18,7 +18,7 @@ def get_parts():
         }), HTTP_200_OK
 
 
-@countries.post('/')
+@countries.post('')
 def post_country():
 
     # Get params in body 

@@ -44,3 +44,9 @@ def validate_images(item):
         if not url(item.get('half_body', '')):
             return False, 'Invalid "half_body" url'
     return item, 'Urls validate'
+
+def validate_list_type(list, type_evaluate):
+    for item in list:
+        if not isinstance(item, type_evaluate):
+            raise ValueError(f'Param value <{item=}> not {type_evaluate.__name__} value')
+

@@ -6,7 +6,7 @@ from src.logic.list_content import list_part
 parts = Blueprint('parts', __name__, url_prefix = '/api/v1/parts')
 
 
-@parts.get('/')
+@parts.get('')
 def get_parts():
     parts_data = Part.query.all()
     parts_list = list()
