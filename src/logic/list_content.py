@@ -7,12 +7,6 @@ def list_images(item):
     }
 
 
-def list_parts(item):
-    return {
-
-    }
-
-
 def list_part(item):
     return {
         'id': item.id,
@@ -22,6 +16,29 @@ def list_part(item):
         'romanization_name': item.romanization_name,
         'alther_name': item.alther_name
     }
+
+def list_stats(item):
+    return {
+        'power': item.power,
+        'speed': item.speed,
+        'range': item.range,
+        'durability': item.durability,
+        'precision': item.precision,
+        'potential': item.potential
+    }
+
+
+def list_stand(item):
+    return {
+        'name': item.name,
+        'japanese_name': item.japanese_name,
+        'alther_name': item.alther_name,
+        'abilities': item.abilities,
+        'battlecry': item.battlecry,
+        'images_id': list_images(item.images_r) if item.images_r else None,
+        'stats_id': list_stats(item.stats_r) if item.stats_r else None,
+    }
+
 
 def list_characters(item):
     return {
@@ -37,7 +54,8 @@ def list_characters(item):
         'is_human': item.is_human,
         'country': list_country(item.country_r) if item.country_r else None,
         'images': list_images(item.images_r) if item.images_r else None,
-        'parts': [ i.number for i in item.parts_r]
+        'parts': [ i.number for i in item.parts_r],
+        'stands': [{ 'id': x.id, 'name': x.name } for x in item.stands_r] if item.stands_r else None
     }
 
 
@@ -50,11 +68,11 @@ def list_country(item):
 
 def list_pagination(item):
     return {
-            'page': item.page,
-            'pages': item.pages,
-            'total_count': item.total,
-            'prev': item.prev_num,
-            'next': item.next_num,
-            'has_prev': item.has_prev,
-            'has_next': item.has_next,
-            }
+        'page': item.page,
+        'pages': item.pages,
+        'total_count': item.total,
+        'prev': item.prev_num,
+        'next': item.next_num,
+        'has_prev': item.has_prev,
+        'has_next': item.has_next,
+        }

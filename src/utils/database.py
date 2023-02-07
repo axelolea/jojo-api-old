@@ -76,12 +76,13 @@ class Image(db.Model):
     __tablename__ = 'images_table'
 
     id = Column(Integer, primary_key=True, unique=True, autoincrement=True)
-    half_body = Column(Text, nullable = False)
     full_body = Column(Text)
+    half_body = Column(Text, nullable = False)
 
     # One to one relationship 
 
     characters_r = db.relationship('Character', back_populates = 'images_r')
+    stands_r = db.relationship('Stand', back_populates = 'images_r')
 
 
     def __repr__(self) -> str:
@@ -118,7 +119,13 @@ class Stand(db.Model):
     alther_name = Column(String(100))
     abilities = Column(Text, nullable = False)
     battlecry = Column(String(120))
-    images_id = Column(Integer, ForeignKey('images_table.id'))
+    images_id = Column(ForeignKey('images_table.id'))
+    stats_id = Column(ForeignKey('stats_table.id'))
+
+    # One to One relationships
+
+    images_r = db.relationship('Image', back_populates = 'stands_r')
+    stats_r = db.relationship('Stats', back_populates = 'stands_r')
 
     # Many to many relationship 
 
@@ -140,13 +147,11 @@ class Stats(db.Model):
     durability = Column(String(8), nullable = False)
     precision = Column(String(8), nullable = False)
     potential = Column(String(8), nullable = False)
-    stand_id = Column(Integer, ForeignKey('stands_table.id'))
+
+    stands_r = db.relationship('Stand', back_populates = 'stats_r')
 
     def __repr__(self) -> str:
         return format_repr('Stats', self.stand_id)
-
-
-
 
 
 # Format class __repr__

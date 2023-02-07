@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from src.utils.database import db, Character, Image, Part
+from src.utils.database import db, Character, Image, Part, Stand, Country
 from src.constants.http_status_codes import (
     HTTP_200_OK,
     HTTP_201_CREATED,
@@ -13,8 +13,8 @@ from src.constants.default_values import (
     MIN_CHARACTERS_PER_PAGE, 
     MAX_CHARACTERS_PER_PAGE,
     PARTS_IN_JOJOS)
-from src.logic.custom_validators import validate_country, validate_images, validate_list_type
-
+# from src.logic.custom_validators import validate_country, validate_images, validate_list_type
+from src.logic.custom_validators import validate_character
 # Create Blueprint 
 characters = Blueprint('characters', __name__, url_prefix = '/api/v1/characters')
 
@@ -65,19 +65,23 @@ def get_character_id(id):
 @characters.post('')
 def post_character():
     # <-- Params will created a character -->
-    # +---------------+----------+----------+-----------------------------------------------
-    # | Params        | Type     | Required | Description
-    # +---------------+----------+----------+-----------------------------------------------
-    # | name          | str      | True     | Alphanumeric name
-    # | alther_name   | str      | False    | Alther name (for CR Claim. etc)
-    # | japanese_name | str      | True     | Name in katakana or kanji
-    # | parts         | list     | True     | List part aparization
-    # | living        | bool     | True     | Is actual living character, skip reset universe of Pucchi
-    # | catchphrase   | str      | False    | Frecuency Use Slogan 
-    # | is_human      | bool     | False    | Is human character 
-    # | country_id    | int/str  | False    | Response a section with id country or code
-    # | images        | dict/obj | False    | Response with dictionary with contain a 2 min images
-    # +---------------|----------|----------|------------------------------------------------|
+    # +---------------+----------+----------+----------------------------------+
+    # | Params        | Type     | Required | Description                      |
+    # +---------------+----------+----------+----------------------------------+
+    # | name          | str      | True     | Alphanumeric name.               |
+    # | japanese_name | str      | True     | Name in katakana or kanji.       |
+    # | alther_name   | str      | False    | Alther name (for CR Claim. etc). |
+    # | parts         | list     | True     | List part aparization.           |
+    # | living        | bool     | True     | Is actual living character, skip |
+    # |               |          |          | reset universe of Pucchi.        |
+    # | catchphrase   | str      | False    | Frecuency Use Slogan.            |
+    # | is_human      | bool     | False    | Is human character.              |
+    # | country_id    | int/str  | False    | Response a section with id       |
+    # |               |          |          | country , code or name.          |
+    # | images        | dict/obj | False    | Response with dictionary with    |
+    # |               |          |          | contain a 2 min images.          |
+    # +---------------+----------+----------+----------------------------------+
+    # images:
     #           {
     #               "half_body" url with image [str] [null]
     #               "full_body" url with image [str] [null]
@@ -85,69 +89,32 @@ def post_character():
 
     try:
         # Body with data params 
-        body = request.json
-
+        body = validate_character(request.json)
         # Required params 
 
         name = body.get('name', None)
         japanese_name = body.get('japanese_name', None)
         parts = body.get('parts', None)
-
-        # Clean list parts 
-
-        # <-- Validators -->
-        # Extremely required name and japanese version 
-
-        if not (name and japanese_name):
-            raise ValueError('El nombre, original y kanji no existen')
-        if not parts:
-            raise ValueError('Las partes de aparicion no existen')
-        # Required parts in aparication
-        if not (isinstance(parts, list)):
-            raise ValueError('Las partes deben estar listadas')
-
-        # ToDO validad parts is iterable
-        parts = [ i for i in parts if (type(i) is int and i in range(1, PARTS_IN_JOJOS + 1))]
-
-        if not (all(parts) and len(parts) > 0):
-            raise ValueError('Los valores en la lista son incorrectos')
-
-        # Get Country 
         country = body.get('country', None)
-
-        # Validar nacionalidad
-        if country:
-            country, msg = validate_country(country)
-            if not country:
-                raise ValueError(msg)
-
-        # Get params with create character
-
-        images = body.get('images', None)
-
-        # Validate images 
-        if images:
-            images, msg = validate_images(images)
-            if not images:
-                raise ValueError(msg)
-            else:
-                images = Image(full_body = images.get('full_body'), half_body = images.get('half_body'))
-                db.session.add(images)
-                db.session.commit()
-
-        # Set values or default values
-
+        # Set values or Default
         is_hamon_user = body.get('is_hamon_user', False)
         is_stand_user = body.get('is_stand_user', False)
         is_gyro_user = body.get('is_gyro_user', False)
         is_human = body.get('is_human', True)
         living = body.get('living', True)
-        
-        validate_list_type([is_hamon_user,is_stand_user,is_gyro_user,is_human,living], bool)
-
         # Set values or Null 
         alther_name = body.get('alther_name', None)
         catchphrase = body.get('catchphrase', None)
+
+
+        # Validar nacionalidad
+        if country:
+            if type(country) == int:
+                country_q = Country.query.filter_by(id = country).first()
+            else:
+                country_q = Country.query.filter_by(country_code = country).first()
+            if not country_q:
+                raise ValueError(f'Not found country with {country} ID or Code')
 
         # Create Character 
         character = Character(
@@ -162,14 +129,33 @@ def post_character():
             is_human = is_human
         )
 
-        if country:
-            character.country_id = country.id
-        if images.id:
-            character.images_id = images.id
-        # Append character with parts 
+        # Set stand 
+        if is_stand_user:
+            for stand in body.get('stands'):
+                if type(stand) == int:
+                    get_stand = Stand.query.filter_by(id = stand).first()
+                elif type(stand) == str:
+                    get_stand = Stand.query.filter_by(name = stand).first()
+                if not get_stand:
+                    raise ValueError(f'Not found stand {stand}')
+                character.stands_r.append(get_stand)
+        # Validate images 
+        new_images = Image()
+        if body.get('images', None):
+            images = body.get('images')
+            new_images = Image(full_body = images.get('full_body', None),
+                               half_body = images.get('half_body', None))
+            db.session.add(new_images)
+            db.session.commit()
+        # Append character with parts
         for number in parts:
             part = Part.query.filter_by(number = number).first()
             character.parts_r.append(part)
+        # Add country and images 
+        if country:
+            character.country_id = country_q.id
+        if new_images.id:
+            character.images_id = new_images.id
 
         # Add Character in database
         db.session.add(character)

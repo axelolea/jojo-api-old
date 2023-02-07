@@ -1,52 +1,41 @@
-from src.utils.database import Country
-from validators import url
+from validator import validate, rules as R
+from src.logic.custom_rules import *
 
-# <-- Country validators -->
+def validate_character(data):
+    rules_character = {
+        "name":             [ R.Required(), R.String(), R.Max(100) ],
+        "alther_name":      [ CustomString(100) ],
+        "japanese_name":    [ R.Required(), R.String(), R.Max(100) ],
+        "catchphrase":      [ CustomString(200) ],
+        "is_stand_user":    [ R.Required(), Boolean() ],
+        "is_hamon_user":    [ R.Required(), Boolean() ],
+        "is_gyro_user":     [ R.Required(), Boolean() ],
+        "living":           [ R.Required(), Boolean() ],
+        "is_human":         [ R.Required(), Boolean() ],
+        "country":          [ Country() ],
+        "images":           [ Images() ],
+        "parts":            [ Parts() ],
+        "stands":           [ Stands( True if data.get('is_stand_user', None) else False ) ]
+    }
+    result, validate_data, errors = validate(data, rules_character, return_info=True)
+    if not result:
+        raise ValueError(errors)
 
-def validate_country(item):
-    # Es alfabetico (Code or name)
-    if isinstance(item, str):
-        if len(item) == 2:
-            country = Country.query.filter_by(
-                    country_code = item.upper()
-                ).first()
-            if not country:
-                return country, 'Invalid code country'
-        else:
-            country = Country.query.filter_by(
-                    country_name = item.upper()
-                ).first()
-            if not country:
-                return country, 'Invalid name country'
-    # Es numerico (Id)
-    elif isinstance(item, int):
-        country = Country.query.filter_by(
-                id = item
-            ).first()
-        if not country:
-            return country, 'Invalid ID country'
-    # Invalid Country 
-    else:
-        return False, 'Invalid country'
+    return validate_data
 
-    return country, 'Country is validate'
+def validate_stand(data):
+    rules_stand = {
+        "name":         [ R.Required(), R.String(), R.Max(100) ],
+        "japanese_name":[ R.Required(), R.String(), R.Max(100) ],
+        "alther_name":  [ CustomString(100) ],
+        "abilities":    [ R.Required(), R.String() ],
+        "battlecry":    [ CustomString(120) ],
+        "stats":        [ Stats() ],
+        "images":       [ Images() ],
+        "parts":        [ Parts() ],
+    }
+    result, validate_data, errors = validate(data, rules_stand, return_info=True)
+    if not result:
+        raise ValueError(errors)
 
-# <-- Images validators -->
-
-def validate_images(item):
-    # check this is exist the full body image 
-    if item.get('full_body', None):
-        if not url(item.get('full_body', '')):
-            return False, 'Invalid "full_body" url'
-
-    # check this is exist the full half image 
-    if item.get('half_body', None):
-        if not url(item.get('half_body', '')):
-            return False, 'Invalid "half_body" url'
-    return item, 'Urls validate'
-
-def validate_list_type(list, type_evaluate):
-    for item in list:
-        if not isinstance(item, type_evaluate):
-            raise ValueError(f'Param value <{item=}> not {type_evaluate.__name__} value')
-
+    return validate_data
