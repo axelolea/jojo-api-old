@@ -1,5 +1,4 @@
 from validator.rules import Rule
-from src.constants.default_values import PARTS_IN_JOJOS
 from validators import url
 from src.constants.default_values import STATS_NAMES, STATS_VALUES
 
@@ -130,17 +129,3 @@ class Stats(Rule):
                 return False
         return True
 
-# Translate Rules 
-class string_to_bool(Rule):
-    def __init__(self):
-        Rule.__init__(self)
-        self.string_boolean = ("yes", "true", "y", "1", "no", "false", "n", "0")
-    def check(self, arg):
-        if arg == None:
-            return True
-        self.set_error(f'{arg} is not Boolean value')
-        if not type(arg) == str:
-            return False
-        if arg.lower() in self.string_boolean:
-            return True
-        return False

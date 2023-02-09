@@ -34,10 +34,26 @@ def query_characters(params):
                 Country.id == country)
                 )
             )
+    
     if (params.get('is_hamon_user') and
         type(string_to_bool(params.get('is_hamon_user')))) == bool:
             value = string_to_bool(params.get('is_hamon_user'))
             q = q.filter(
                 Character.is_hamon_user == value
                 )
+    
+    if (params.get('is_stand_user') and
+        type(string_to_bool(params.get('is_stand_user')))) == bool:
+            value = string_to_bool(params.get('is_stand_user'))
+            q = q.filter(
+                Character.is_stand_user == value
+                )
+
+    if (params.get('is_gyro_user') and
+        type(string_to_bool(params.get('is_gyro_user')))) == bool:
+            value = string_to_bool(params.get('is_gyro_user'))
+            q = q.filter(
+                Character.is_gyro_user == value
+                )
+
     return q.all()
