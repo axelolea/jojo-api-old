@@ -39,3 +39,21 @@ def validate_stand(data):
         raise ValueError(errors)
 
     return validate_data
+
+def validate_params(params):
+    rules_params = {
+        "name":         [ R.String() ],
+        "part":         [  ],
+        "country":      [ Country() ],
+        "is_hamon_user":[ string_to_bool() ],
+        "is_stand_user":[ string_to_bool() ],
+        "is_gyro_user": [ string_to_bool() ],
+        "living":       [ string_to_bool() ],
+        "is_human":     [ string_to_bool() ],
+    }
+    result, validate_params, errors = validate(params, rules_params, return_info=True)
+    
+    if not result:
+        raise ValueError(errors)
+    # return validate_params
+    return params

@@ -33,8 +33,8 @@ def query_characters(params):
                 Country.id == params.get('country', None)
                 ))
             )
-    if params.get('is_hamon_user', None):
-        if type(string_to_bool(params.get('is_hamon_user', None))) == bool:
+    if (params.get('is_hamon_user', None) and
+        type(string_to_bool(params.get('is_hamon_user', None)))) == bool:
             value = string_to_bool(params.get('is_hamon_user', None))
             q = q.filter(
                 Character.is_hamon_user == value

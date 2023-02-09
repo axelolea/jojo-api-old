@@ -11,6 +11,7 @@ class Boolean(Rule):
         self.set_error(f'{arg} is not Boolean value')
         return type(arg) == bool
 
+
 class CustomString(Rule):
     def __init__(self, max):
         Rule.__init__(self)
@@ -112,17 +113,34 @@ class Stats(Rule):
         Rule.__init__(self)
     def check(self, arg):
         if not arg:
-            self.set_error('Not found stats')
+            self.set_error('Not found stats.')
             return False
         if not isinstance(arg, dict):
-            self.set_error(f'"stats" is not obj')
+            self.set_error(f'"stats" is not obj.')
             return False
         for name in STATS_NAMES:
             if not name in arg:
-                self.set_error(f'Missing "{name}" in stats')
+                self.set_error(f'Missing "{name}" in stats.')
                 return False
-            if not arg.get(name, None) in STATS_VALUES:
-                self.set_error(f'"{name}" is invalid value')
+            if not type(arg.get(name)) == str:
+                self.set_error(f'"{name}" are must string.')
+                return False
+            if not arg.get(name).upper() in STATS_VALUES:
+                self.set_error(f'"{name}" is invalid value.')
                 return False
         return True
 
+# Translate Rules 
+class string_to_bool(Rule):
+    def __init__(self):
+        Rule.__init__(self)
+        self.string_boolean = ("yes", "true", "y", "1", "no", "false", "n", "0")
+    def check(self, arg):
+        if arg == None:
+            return True
+        self.set_error(f'{arg} is not Boolean value')
+        if not type(arg) == str:
+            return False
+        if arg.lower() in self.string_boolean:
+            return True
+        return False

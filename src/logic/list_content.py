@@ -39,6 +39,13 @@ def list_stand(item):
         'stats_id': list_stats(item.stats_r) if item.stats_r else None,
     }
 
+def list_character_basic(item):
+    return {
+        'id': item.id,
+        'name': item.name,
+        'images': list_images(item.images_r) if item.images_r else None,
+    }
+
 
 def list_characters(item):
     return {
