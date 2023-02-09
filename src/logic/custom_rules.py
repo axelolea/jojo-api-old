@@ -92,13 +92,13 @@ class Images(Rule):
             self.set_error(f'"images" is not obj.')
             return False
         
-        if arg.get('full_body', None):
-            if not url(arg.get('full_body', None)):
+        if arg.get('full_body'):
+            if not url(arg.get('full_body')):
                 self.set_error(f'"full_body" is not valid url')
                 return False
-        if arg.get('half_body', None):
-            if arg.get('half_body', None):
-                if not url(arg.get('half_body', None)):
+        if arg.get('half_body'):
+            if arg.get('half_body'):
+                if not url(arg.get('half_body')):
                     self.set_error(f'"half_body" is not valid url')
                     return False
         else:

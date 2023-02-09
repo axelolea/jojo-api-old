@@ -15,7 +15,7 @@ def validate_character(data):
         "country":          [ Country() ],
         "images":           [ Images() ],
         "parts":            [ Parts() ],
-        "stands":           [ Stands( True if data.get('is_stand_user', None) else False ) ]
+        "stands":           [ Stands( True if data.get('is_stand_user') else False ) ]
     }
     result, validate_data, errors = validate(data, rules_character, return_info=True)
     if not result:

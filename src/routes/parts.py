@@ -30,11 +30,11 @@ def get_part_id(id):
 @parts.post('')
 def post_parts():
     try:
-        name = request.get_json().get('name', None)
-        number = request.get_json().get('number', None)
-        japanese_name = request.get_json().get('japanese_name', None)
-        romanization_name = request.get_json().get('romanization_name', None)
-        alther_name = request.get_json().get('alther_name', None)
+        name = request.get_json().get('name')
+        number = request.get_json().get('number')
+        japanese_name = request.get_json().get('japanese_name')
+        romanization_name = request.get_json().get('romanization_name')
+        alther_name = request.get_json().get('alther_name')
         if not (name and number and japanese_name and romanization_name):
             return jsonify({
                 'error': 'Faltan parametros'

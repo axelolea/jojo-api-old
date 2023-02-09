@@ -87,10 +87,10 @@ def post_character():
         body = validate_character(request.json)
         # Required params 
 
-        name = body.get('name', None)
-        japanese_name = body.get('japanese_name', None)
-        parts = body.get('parts', None)
-        country = body.get('country', None)
+        name = body.get('name')
+        japanese_name = body.get('japanese_name')
+        parts = body.get('parts')
+        country = body.get('country')
         # Set values or Default
         is_hamon_user = body.get('is_hamon_user', False)
         is_stand_user = body.get('is_stand_user', False)
@@ -98,8 +98,8 @@ def post_character():
         is_human = body.get('is_human', True)
         living = body.get('living', True)
         # Set values or Null 
-        alther_name = body.get('alther_name', None)
-        catchphrase = body.get('catchphrase', None)
+        alther_name = body.get('alther_name')
+        catchphrase = body.get('catchphrase')
 
 
         # Validar nacionalidad
@@ -136,10 +136,10 @@ def post_character():
                 character.stands_r.append(get_stand)
         # Validate images 
         new_images = Image()
-        if body.get('images', None):
+        if body.get('images'):
             images = body.get('images')
-            new_images = Image(full_body = images.get('full_body', None),
-                               half_body = images.get('half_body', None))
+            new_images = Image(full_body = images.get('full_body'),
+                               half_body = images.get('half_body'))
             db.session.add(new_images)
             db.session.commit()
         # Append character with parts

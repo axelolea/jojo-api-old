@@ -97,14 +97,14 @@ def post_stands():
     try:
         body = validate_stand(request.json)
 
-        name = body.get('name', None)
-        japanese_name = body.get('japanese_name', None)
-        parts = body.get('parts', None)
-        abilities = body.get('abilities', None)
+        name = body.get('name')
+        japanese_name = body.get('japanese_name')
+        parts = body.get('parts')
+        abilities = body.get('abilities')
 
         # Validate Stats, if incorrect data, create raise Value Error 
 
-        stats = body.get('stats', None)
+        stats = body.get('stats')
         new_stats = Stats(
             power = stats.get('power').upper(),
             speed = stats.get('speed').upper(),
@@ -118,8 +118,8 @@ def post_stands():
         db.session.commit()
 
         # Other data 
-        alther_name = body.get('alther_name', None)
-        battlecry = body.get('battlecry', None)
+        alther_name = body.get('alther_name')
+        battlecry = body.get('battlecry')
 
         new_stand = Stand(
             name = name,
@@ -131,10 +131,10 @@ def post_stands():
 
         # Validate images
         new_images = Image()
-        if body.get('images', None):
+        if body.get('images'):
             images = body.get('images')
-            new_images = Image(full_body = images.get('full_body', None),
-                               half_body = images.get('half_body', None))
+            new_images = Image(full_body = images.get('full_body'),
+                               half_body = images.get('half_body'))
             db.session.add(new_images)
             db.session.commit()
 

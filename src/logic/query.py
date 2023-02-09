@@ -16,26 +16,27 @@ def query_characters(params):
     # is_gyro_user
     # living
     # is_human
-    if params.get('name', None):
+    if params.get('name'):
         q = q.filter(
             Character.name.like(f'%{params.get("name")}%') | 
             Character.alther_name.like(f'%{params.get("name")}%')
             )
-    if params.get('parts', None):
+    if params.get('parts'):
         parts_list = params.get('parts').split(',')
         q = q.filter(
             Character.parts_r.any(Part.number.in_(parts_list))
             )
-    if params.get('country', None):
+    if params.get('country'):
+        country = params.get('country')
         q = q.filter(
             Character.country_r.has((
-                Country.country_code == params.get('country')) | (
-                Country.id == params.get('country', None)
-                ))
+                Country.country_code == country) | (
+                Country.id == country)
+                )
             )
-    if (params.get('is_hamon_user', None) and
-        type(string_to_bool(params.get('is_hamon_user', None)))) == bool:
-            value = string_to_bool(params.get('is_hamon_user', None))
+    if (params.get('is_hamon_user') and
+        type(string_to_bool(params.get('is_hamon_user')))) == bool:
+            value = string_to_bool(params.get('is_hamon_user'))
             q = q.filter(
                 Character.is_hamon_user == value
                 )

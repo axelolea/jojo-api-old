@@ -22,8 +22,8 @@ def get_parts():
 def post_country():
 
     # Get params in body 
-    name = request.json.get('name', None).upper()
-    code = request.json.get('code', None).upper()
+    name = request.json.get('name').upper()
+    code = request.json.get('code').upper()
     # Valid content data in params 
     if not (name and code):
         return jsonify({
