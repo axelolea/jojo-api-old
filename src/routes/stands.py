@@ -46,7 +46,7 @@ def get_stands():
 
 @stands.get('/<int:id>')
 def get_character_id(id):
-    stand = Stand.query.filter_by(id = id).first()
+    stand = Stand.query.get(id)
     if not stand:
         return jsonify({
             'message': f'Not found part with <id:{id}>'
@@ -106,12 +106,12 @@ def post_stands():
 
         stats = body.get('stats', None)
         new_stats = Stats(
-            power = stats.get('power'),
-            speed = stats.get('speed'),
-            range = stats.get('range'),
-            durability = stats.get('durability'),
-            precision = stats.get('precision'),
-            potential = stats.get('potential')
+            power = stats.get('power').upper(),
+            speed = stats.get('speed').upper(),
+            range = stats.get('range').upper(),
+            durability = stats.get('durability').upper(),
+            precision = stats.get('precision').upper(),
+            potential = stats.get('potential').upper()
         )
         # Add Character in database
         db.session.add(new_stats)

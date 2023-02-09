@@ -6,7 +6,7 @@ from src.constants.http_status_codes import (
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
     HTTP_500_INTERNAL_SERVER_ERROR)
-from src.logic.list_content import list_characters, list_images, list_pagination
+from src.logic.list_content import list_characters, list_images, list_pagination, list_character_basic
 from src.constants.default_values import (
     INITIAL_PAGE,
     DEFAULT_CHARACTERS_PER_PAGE,
@@ -14,7 +14,7 @@ from src.constants.default_values import (
     MAX_CHARACTERS_PER_PAGE,
     PARTS_IN_JOJOS)
 # from src.logic.custom_validators import validate_country, validate_images, validate_list_type
-from src.logic.custom_validators import validate_character
+from src.logic.custom_validators import validate_character, validate_params
 # Create Blueprint 
 characters = Blueprint('characters', __name__, url_prefix = '/api/v1/characters')
 
@@ -30,14 +30,9 @@ def get_characters():
         data = list()
 
         for item in characters_data:
-            data.append({
-                'id': item.id,
-                'name': item.name,
-                'images': list_images(item.images_r) if item.images_r else None,
-            })
+            data.append(list_character_basic(item))
 
         return jsonify({
-            'message': 'hola',
             'data': data,
             'pagination': list_pagination(characters_data)
             }), HTTP_200_OK
@@ -52,7 +47,7 @@ def get_characters():
 
 @characters.get('/<int:id>')
 def get_character_id(id):
-    character = Character.query.filter_by(id = id).first()
+    character = Character.query.get(id)
     if not character:
         return jsonify({
             'message': f'Not found part with <id:{id}>'
@@ -172,12 +167,12 @@ def post_character():
         'error': 'Uno de los parametros es incorrecto',
         }), HTTP_400_BAD_REQUEST
     # <-- General exception error return -->
-    # except:
-    #     return jsonify({
-    #     'status': 500,
-    #     'type': 'ServerError',
-    #     "error": 'Problemas internos D:',
-    #     }), HTTP_500_INTERNAL_SERVER_ERROR
+    except:
+        return jsonify({
+        'status': 500,
+        'type': 'ServerError',
+        "error": 'Problemas internos D:',
+        }), HTTP_500_INTERNAL_SERVER_ERROR
     # <-- Send data of character created and status 201 [Created] -->
     else:
         return jsonify({
@@ -185,3 +180,33 @@ def post_character():
             'message': f'Character: {character.name} is created successfully',
             'data': list_characters(character)
             }), HTTP_201_CREATED
+
+from src.logic.query import query_characters
+
+@characters.get('/query')
+def query_characters_xd():
+    # Query params
+    # Name
+    # Part
+    # Country
+    # is_hamon_user
+    # is_stand_user
+    # is_gyro_user
+    # living
+    # is_human
+    try:
+        if not len(request.args):
+            raise ValueError('Query witout params')
+        params = validate_params(request.args)
+        q = query_characters(params)
+    except Exception as e:
+        return jsonify({
+            'message': f'<Invalid Query>',
+            'error': e.args[0]
+
+            }), HTTP_404_NOT_FOUND
+    else:
+        return jsonify({
+            'params': params,
+            'q': [ list_character_basic(x) for x in q ]
+            }), HTTP_200_OK
