@@ -96,7 +96,6 @@ def post_stands():
     # STATS_VALUES = [None, "A", "B", "C", "D", "E", "INFINITE", "?"]
     try:
         body = validate_stand(request.json)
-
         name = body.get('name')
         japanese_name = body.get('japanese_name')
         parts = body.get('parts')

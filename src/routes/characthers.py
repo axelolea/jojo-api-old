@@ -12,11 +12,13 @@ from src.constants.default_values import (
     DEFAULT_CHARACTERS_PER_PAGE,
     MIN_CHARACTERS_PER_PAGE, 
     MAX_CHARACTERS_PER_PAGE,
-    PARTS_IN_JOJOS)
+    get_error_response)
 # from src.logic.custom_validators import validate_country, validate_images, validate_list_type
-from src.logic.custom_validators import validate_character, validate_params
+from src.logic.custom_validators import validate_character
 # Create Blueprint 
 characters = Blueprint('characters', __name__, url_prefix = '/api/v1/characters')
+
+from schema import SchemaMissingKeyError, SchemaError, SchemaWrongKeyError
 
 
 @characters.get('')
@@ -41,7 +43,7 @@ def get_characters():
             'status': 400,
             'type': type(e).__name__,
             'message': e.args[0],
-            "error": 'Uno de los parametros es incorrecto',
+            "error": 'Params are invalid.',
             }), HTTP_400_BAD_REQUEST
 
 
@@ -92,11 +94,11 @@ def post_character():
         parts = body.get('parts')
         country = body.get('country')
         # Set values or Default
-        is_hamon_user = body.get('is_hamon_user', False)
-        is_stand_user = body.get('is_stand_user', False)
-        is_gyro_user = body.get('is_gyro_user', False)
-        is_human = body.get('is_human', True)
-        living = body.get('living', True)
+        is_hamon_user = body.get('is_hamon_user')
+        is_stand_user = body.get('is_stand_user')
+        is_gyro_user = body.get('is_gyro_user')
+        is_human = body.get('is_human')
+        living = body.get('living')
         # Set values or Null 
         alther_name = body.get('alther_name')
         catchphrase = body.get('catchphrase')
@@ -160,19 +162,20 @@ def post_character():
 
     # <-- Value of params is invalid, Exception ( message ) -->
     except ValueError as e:
-        return jsonify({
-        'status': 400,
-        'type': type(e).__name__,
-        'message': e.args[0],
-        'error': 'Uno de los parametros es incorrecto',
-        }), HTTP_400_BAD_REQUEST
+        return get_error_response(e, HTTP_400_BAD_REQUEST, 'Params are invalid.')
+    except SchemaMissingKeyError as e:
+        return get_error_response(e, HTTP_400_BAD_REQUEST, 'Params are invalid.')
+    except SchemaError as e:
+        return get_error_response(e, HTTP_400_BAD_REQUEST, 'Params are invalid.')
+    except SchemaWrongKeyError as e:
+        return get_error_response(e, HTTP_400_BAD_REQUEST, 'Params are invalid.')
     # <-- General exception error return -->
-    except:
-        return jsonify({
-        'status': 500,
-        'type': 'ServerError',
-        "error": 'Problemas internos D:',
-        }), HTTP_500_INTERNAL_SERVER_ERROR
+    # except:
+    #     return jsonify({
+    #     'status': 500,
+    #     'type': 'ServerError',
+    #     "error": 'Problemas internos D:',
+    #     }), HTTP_500_INTERNAL_SERVER_ERROR
     # <-- Send data of character created and status 201 [Created] -->
     else:
         return jsonify({
@@ -182,6 +185,7 @@ def post_character():
             }), HTTP_201_CREATED
 
 from src.logic.query import query_characters
+from src.logic.custom_validators import validate_character_params
 
 @characters.get('/query')
 def query_characters_xd():
@@ -195,15 +199,19 @@ def query_characters_xd():
     # living
     # is_human
     try:
+        params = validate_character_params(request.args)
         if not len(request.args):
             raise ValueError('Query witout params')
-        params = validate_params(request.args)
         q = query_characters(params)
-    except Exception as e:
+    except SchemaMissingKeyError as e:
         return jsonify({
-            'message': f'<Invalid Query>',
-            'error': e.args[0]
-
+            'message': e.args[0],
+            'error': type(e).__name__
+            }), HTTP_404_NOT_FOUND
+    except ValueError as e:
+        return jsonify({
+            'message': e.args[0],
+            'error': type(e).__name__
             }), HTTP_404_NOT_FOUND
     else:
         return jsonify({
