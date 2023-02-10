@@ -10,6 +10,7 @@ from src.routes.characthers import characters
 from src.routes.stands import stands
 from src.routes.parts import parts
 from src.routes.countries import countries
+from src.routes.images import images
 
 def create_app(test_config = None):
 
@@ -35,5 +36,6 @@ def create_app(test_config = None):
     app.register_blueprint(stands)
     app.register_blueprint(parts)
     app.register_blueprint(countries)
+    app.register_blueprint(images)
 
     return app
