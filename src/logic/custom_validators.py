@@ -101,12 +101,13 @@ def validate_character_params(params):
             And(str, lambda x : len(x) == 2),
             And(str, lambda x : x.isdigit())
         ),
-        Optional(
-            'is_hamon_user',
-            'is_stand_user',
-            'is_gyro_user',
-            'living',
-            'is_human'
+        Optional(Or(
+                'is_hamon_user',
+                'is_stand_user',
+                'is_gyro_user',
+                'living',
+                'is_human'
+            )
         ): And(
             Use(string_to_bool),
             bool
