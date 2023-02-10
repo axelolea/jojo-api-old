@@ -3,9 +3,13 @@ from src.utils.database import db, Country
 from src.constants.http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 
 from src.logic.list_content import list_country
+from src.constants.default_values import get_response
+
+from schema import SchemaError
 
 countries = Blueprint('countries', __name__, url_prefix = '/api/v1/countries')
 
+from src.logic.custom_validators import country_validator
 
 @countries.get('')
 def get_parts():
@@ -20,34 +24,34 @@ def get_parts():
 
 @countries.post('')
 def post_country():
-
-    # Get params in body 
-    name = request.json.get('name').upper()
-    code = request.json.get('code').upper()
-    # Valid content data in params 
-    if not (name and code):
-        return jsonify({
-        'message': 'Faltan parametros'
-        }), HTTP_400_BAD_REQUEST
-    # Valid syntax of Code
-    if not (len(code) == 2 and code.isalpha()):
-        return jsonify({
-        'message': 'Codigo no valido, debe tener logitud de 2 y alfabetico'
-        }), HTTP_400_BAD_REQUEST
-    if Country.query.filter_by(country_name = name).first() is not None:
-        return jsonify({
-        'message': 'La nacionalidad ya fue creada'
-        }), HTTP_400_BAD_REQUEST
-    if Country.query.filter_by(country_code = code).first() is not None:
-        return jsonify({
-        'message': 'La nacionalidad ya fue creada'
-        }), HTTP_400_BAD_REQUEST
-    # Create country obj 
-    country = Country(country_name = name, country_code = code)
-    # Add obj Coutry in database 
-    db.session.add(country)
-    db.session.commit()
+    try:
+        body = country_validator(request.json)
+        # Get params in body 
+        if Country.query.filter_by(
+            country_name = body.get('name')
+        ).first() is not None:
+            raise ValueError('La nacionalidad ya fue creada')
+        if Country.query.filter_by(
+            country_code = body.get('code')
+        ).first() is not None:
+            raise ValueError('La nacionalidad ya fue creada')
+        # Create country obj 
+        country = Country(
+            country_name = body.get('name'),
+            country_code = body.get('code')
+        )
+        # Add obj Coutry in database 
+        db.session.add(country)
+        db.session.commit()
+    except SchemaError as e:
+        return get_response(HTTP_400_BAD_REQUEST, e = e)
+    except ValueError as e:
+        return get_response(
+            HTTP_400_BAD_REQUEST
+        )
     # Return data 
-    return jsonify({
-        'data': list_country(country)
-        }), HTTP_201_CREATED
+    else:
+        return get_response(
+            HTTP_201_CREATED,
+            data = list_country(country)
+        )

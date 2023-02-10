@@ -5,6 +5,7 @@ from src.logic.list_content import list_part
 
 parts = Blueprint('parts', __name__, url_prefix = '/api/v1/parts')
 
+from src.constants.default_values import get_response
 
 @parts.get('')
 def get_parts():
@@ -12,20 +13,23 @@ def get_parts():
     parts_list = list()
     for part in parts_data:
         parts_list.append(list_part(part))
-    return jsonify({
-        'data': parts_list
-        }), HTTP_200_OK
+    return get_response(
+        HTTP_200_OK,
+        data = parts_list
+    )
 
 @parts.get('/<int:id>')
 def get_part_id(id):
     part = Part.query.filter_by(id = id).first()
     if not part:
-        return jsonify({
-            'message': f'Not found part with <id:{id}>'
-            }), HTTP_404_NOT_FOUND
-    return jsonify({
-        'data': list_part(part)
-        }), HTTP_200_OK
+        return get_response(
+            HTTP_404_NOT_FOUND,
+            msg = 'Part not Founded'
+        )
+    return get_response(
+        HTTP_200_OK,
+        data = list_part(part)
+    )
 
 @parts.post('')
 def post_parts():

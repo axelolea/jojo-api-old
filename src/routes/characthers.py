@@ -161,8 +161,11 @@ def post_character():
         new_images = Image()
         if body.get('images'):
             images = body.get('images')
-            new_images = Image(full_body = images.get('full_body'),
-                               half_body = images.get('half_body'))
+            new_images = Image(
+                full_body = images.get('full_body'),
+                half_body = images.get('half_body'),
+                type_image = 'CHARACTER'
+            )
             db.session.add(new_images)
             db.session.commit()
         # Append character with parts
