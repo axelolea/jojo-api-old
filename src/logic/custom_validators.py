@@ -102,26 +102,16 @@ def validate_character_params(params):
             And(str, lambda x : len(x) == 2),
             And(str, lambda x : x.isdigit())
         ),
-        Optional('is_hamon_user'): And(
+        Optional(
+            'is_hamon_user',
+            'is_stand_user',
+            'is_gyro_user',
+            'living',
+            'is_human'
+        ): And(
             Use(string_to_bool),
             bool
         ),
-        Optional('is_stand_user'): And(
-            Use(string_to_bool),
-            bool
-        ),
-        Optional('is_gyro_user'): And(
-            Use(string_to_bool),
-            bool
-        ),
-        Optional('living'): And(
-            Use(string_to_bool),
-            bool
-        ),
-        Optional('is_human'): And(
-            Use(string_to_bool),
-            bool
-        )
     })
     return params_schema.validate(dict(params))
 
