@@ -28,8 +28,27 @@ def list_stats(item):
     }
 
 
+def list_character_basic(item):
+    return {
+        'id': item.id,
+        'name': item.name,
+        'japanese_name': item.japanese_name,
+        'images': list_images(item.images_r) if item.images_r else None,
+    }
+
+
+def list_stand_basic(item):
+    return {
+        'id': item.id,
+        'name': item.name,
+        'japanese_name': item.japanese_name,
+        'images_id': list_images(item.images_r) if item.images_r else None,
+    }
+
+
 def list_stand(item):
     return {
+        'id': item.id,
         'name': item.name,
         'japanese_name': item.japanese_name,
         'alther_name': item.alther_name,
@@ -37,13 +56,6 @@ def list_stand(item):
         'battlecry': item.battlecry,
         'images_id': list_images(item.images_r) if item.images_r else None,
         'stats_id': list_stats(item.stats_r) if item.stats_r else None,
-    }
-
-def list_character_basic(item):
-    return {
-        'id': item.id,
-        'name': item.name,
-        'images': list_images(item.images_r) if item.images_r else None,
     }
 
 

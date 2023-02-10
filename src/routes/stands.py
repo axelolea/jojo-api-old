@@ -1,40 +1,59 @@
 from flask import Blueprint, jsonify, request
-from src.utils.database import db, Stand, Stats, Image, Part
-from src.constants.http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
-
-from src.logic.custom_validators import validate_stand
-
-from src.logic.list_content import list_images, list_pagination, list_stand
-from src.constants.default_values import (
-    INITIAL_PAGE,
-    DEFAULT_CHARACTERS_PER_PAGE,
-    MIN_CHARACTERS_PER_PAGE,
-    MAX_CHARACTERS_PER_PAGE
+from src.utils.database import (
+    db,
+    Stand, 
+    Stats, 
+    Image, 
+    Part
 )
+
+from src.constants.default_values import (
+    get_response
+)
+
+from src.constants.http_status_codes import (
+    HTTP_200_OK,
+    HTTP_201_CREATED,
+    HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
+    HTTP_500_INTERNAL_SERVER_ERROR
+)
+
+from src.logic.custom_validators import (
+    validate_stand,
+    validate_pagination,
+    validate_stand_params
+)
+
+from src.logic.list_content import (
+    list_images,
+    list_pagination,
+    list_stand,
+    list_stand_basic
+)
+
+from schema import (
+    SchemaError, 
+    SchemaMissingKeyError, 
+    SchemaWrongKeyError
+)
+
+from src.logic.query import query_stands
+
 stands = Blueprint('stands', __name__, url_prefix = '/api/v1/stands')
 
 @stands.get('')
 def get_stands():
     try:
-        page = request.args.get('page', INITIAL_PAGE, type=int)
-        per_page = request.args.get('per_page', DEFAULT_CHARACTERS_PER_PAGE, type=int)
-        if not (per_page in range(MIN_CHARACTERS_PER_PAGE, MAX_CHARACTERS_PER_PAGE)):
-            raise ValueError('Per Page is out of limit range')
-        characters_data = Stand.query.paginate(page = page, per_page = per_page)
+        params = validate_pagination(request.args)
+        characters_data = Stand.query.paginate(
+            page = params.get('page'),
+            per_page = params.get('per_page')
+        )
         data = list()
 
         for item in characters_data:
-            data.append({
-                'id': item.id,
-                'name': item.name,
-                'images': list_images(item.images_r) if item.images_r else None,
-            })
-
-        return jsonify({
-            'message': 'hola',
-            'data': data,
-            'pagination': list_pagination(characters_data)
-            }), HTTP_200_OK
+            data.append(list_stand_basic(item))
     except ValueError as e:
         return jsonify({
             'status': 400,
@@ -42,6 +61,16 @@ def get_stands():
             'message': e.args[0],
             "error": 'Uno de los parametros es incorrecto',
             }), HTTP_400_BAD_REQUEST
+    else:
+        return get_response(
+            HTTP_200_OK,
+            data = data,
+            pagination = list_pagination(characters_data)
+            )
+        return jsonify({
+                    'data': data,
+                    'pagination': list_pagination(characters_data)
+                    }), HTTP_200_OK
 
 
 @stands.get('/<int:id>')
@@ -96,36 +125,28 @@ def post_stands():
     # STATS_VALUES = [None, "A", "B", "C", "D", "E", "INFINITE", "?"]
     try:
         body = validate_stand(request.json)
-        name = body.get('name')
-        japanese_name = body.get('japanese_name')
-        parts = body.get('parts')
-        abilities = body.get('abilities')
 
         # Validate Stats, if incorrect data, create raise Value Error 
 
         stats = body.get('stats')
         new_stats = Stats(
-            power = stats.get('power').upper(),
-            speed = stats.get('speed').upper(),
-            range = stats.get('range').upper(),
-            durability = stats.get('durability').upper(),
-            precision = stats.get('precision').upper(),
-            potential = stats.get('potential').upper()
+            power = stats.get('power'),
+            speed = stats.get('speed'),
+            range = stats.get('range'),
+            durability = stats.get('durability'),
+            precision = stats.get('precision'),
+            potential = stats.get('potential')
         )
         # Add Character in database
         db.session.add(new_stats)
         db.session.commit()
 
-        # Other data 
-        alther_name = body.get('alther_name')
-        battlecry = body.get('battlecry')
-
         new_stand = Stand(
-            name = name,
-            japanese_name = japanese_name,
-            alther_name = alther_name,
-            abilities = abilities,
-            battlecry = battlecry
+            name = body.get('name'),
+            japanese_name = body.get('japanese_name'),
+            alther_name = body.get('alther_name'),
+            abilities = body.get('abilities'),
+            battlecry = body.get('battlecry')
         )
 
         # Validate images
@@ -137,6 +158,8 @@ def post_stands():
             db.session.add(new_images)
             db.session.commit()
 
+        parts = body.get('parts')
+        
         if new_images.id:
             new_stand.images_id = new_images.id
         if new_stats.id:
@@ -158,3 +181,37 @@ def post_stands():
         return jsonify({
             'data': list_stand(new_stand)
         }), HTTP_201_CREATED
+
+
+@stands.get('/query')
+def query():
+    # Query params
+    # Name
+    # Part
+    # Country
+    # is_hamon_user
+    # is_stand_user
+    # is_gyro_user
+    # living
+    # is_human
+    try:
+        params = validate_stand_params(request.args)
+        if not len(request.args):
+            raise ValueError('Query witout params')
+        q = query_stands(params)
+    except (SchemaError, SchemaMissingKeyError, SchemaWrongKeyError) as e:
+        return get_response(
+            HTTP_400_BAD_REQUEST,
+            msg = 'Params are invalid.',
+            e = e
+        )
+    except ValueError as e:
+        return jsonify({
+            'message': e.args[0],
+            'error': type(e).__name__
+            }), HTTP_404_NOT_FOUND
+    else:
+        return jsonify({
+            'params': params,
+            'q': [ list_stand_basic(x) for x in q ]
+            }), HTTP_200_OK

@@ -1,20 +1,35 @@
 from flask import Blueprint, jsonify, request
-from src.utils.database import db, Character, Image, Part, Stand, Country
+from src.utils.database import (
+    db,
+    Character,
+    Image,
+    Part,
+    Stand,
+    Country
+)
 from src.constants.http_status_codes import (
     HTTP_200_OK,
     HTTP_201_CREATED,
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
-    HTTP_500_INTERNAL_SERVER_ERROR)
-from src.logic.list_content import list_characters, list_images, list_pagination, list_character_basic
+    HTTP_500_INTERNAL_SERVER_ERROR
+)
+from src.logic.list_content import (
+    list_characters,
+    list_pagination,
+    list_character_basic
+)
 from src.constants.default_values import (
-    INITIAL_PAGE,
-    DEFAULT_CHARACTERS_PER_PAGE,
-    MIN_CHARACTERS_PER_PAGE, 
-    MAX_CHARACTERS_PER_PAGE,
-    get_error_response)
-# from src.logic.custom_validators import validate_country, validate_images, validate_list_type
-from src.logic.custom_validators import validate_character
+    get_response
+)
+
+from src.logic.query import query_characters
+
+from src.logic.custom_validators import (
+    validate_character,
+    validate_character_params,
+    validate_pagination
+)
 # Create Blueprint 
 characters = Blueprint('characters', __name__, url_prefix = '/api/v1/characters')
 
@@ -24,20 +39,21 @@ from schema import SchemaMissingKeyError, SchemaError, SchemaWrongKeyError
 @characters.get('')
 def get_characters():
     try:
-        page = request.args.get('page', INITIAL_PAGE, type=int)
-        per_page = request.args.get('per_page', DEFAULT_CHARACTERS_PER_PAGE, type=int)
-        if not (per_page in range(MIN_CHARACTERS_PER_PAGE, MAX_CHARACTERS_PER_PAGE)):
-            raise ValueError('Per Page is out of limit range')
-        characters_data = Character.query.paginate(page = page, per_page = per_page)
+        params = validate_pagination(request.args)
+        characters_data = Character.query.paginate(
+            page = params.get('page'),
+            per_page = params.get('per_page'))
+
         data = list()
 
         for item in characters_data:
             data.append(list_character_basic(item))
-
-        return jsonify({
-            'data': data,
-            'pagination': list_pagination(characters_data)
-            }), HTTP_200_OK
+    except SchemaError as e:
+        return get_response(
+            HTTP_400_BAD_REQUEST,
+            msg = 'Invalid pagination params.',
+            e = e
+        )
     except ValueError as e:
         return jsonify({
             'status': 400,
@@ -45,6 +61,11 @@ def get_characters():
             'message': e.args[0],
             "error": 'Params are invalid.',
             }), HTTP_400_BAD_REQUEST
+    else:
+        return jsonify({
+            'data': data,
+            'pagination': list_pagination(characters_data)
+            }), HTTP_200_OK
 
 
 @characters.get('/<int:id>')
@@ -162,20 +183,22 @@ def post_character():
 
     # <-- Value of params is invalid, Exception ( message ) -->
     except ValueError as e:
-        return get_error_response(e, HTTP_400_BAD_REQUEST, 'Params are invalid.')
-    except SchemaMissingKeyError as e:
-        return get_error_response(e, HTTP_400_BAD_REQUEST, 'Params are invalid.')
-    except SchemaError as e:
-        return get_error_response(e, HTTP_400_BAD_REQUEST, 'Params are invalid.')
-    except SchemaWrongKeyError as e:
-        return get_error_response(e, HTTP_400_BAD_REQUEST, 'Params are invalid.')
+        return get_response(
+            HTTP_400_BAD_REQUEST,
+            msg = 'Params are invalid.',
+            e = e
+            );
+    except (SchemaError, SchemaMissingKeyError, SchemaWrongKeyError) as e:
+        return get_response(
+            HTTP_400_BAD_REQUEST,
+            msg = 'Params are invalid.',
+            e = e
+            )
     # <-- General exception error return -->
-    # except:
-    #     return jsonify({
-    #     'status': 500,
-    #     'type': 'ServerError',
-    #     "error": 'Problemas internos D:',
-    #     }), HTTP_500_INTERNAL_SERVER_ERROR
+    except:
+        return get_response(
+            HTTP_500_INTERNAL_SERVER_ERROR
+            )
     # <-- Send data of character created and status 201 [Created] -->
     else:
         return jsonify({
@@ -184,11 +207,9 @@ def post_character():
             'data': list_characters(character)
             }), HTTP_201_CREATED
 
-from src.logic.query import query_characters
-from src.logic.custom_validators import validate_character_params
 
 @characters.get('/query')
-def query_characters_xd():
+def query():
     # Query params
     # Name
     # Part
@@ -203,11 +224,12 @@ def query_characters_xd():
         if not len(request.args):
             raise ValueError('Query witout params')
         q = query_characters(params)
-    except SchemaMissingKeyError as e:
-        return jsonify({
-            'message': e.args[0],
-            'error': type(e).__name__
-            }), HTTP_404_NOT_FOUND
+    except (SchemaError, SchemaMissingKeyError, SchemaWrongKeyError) as e:
+        return get_response(
+            HTTP_400_BAD_REQUEST,
+            msg = 'Params are invalid.',
+            e = e
+        )
     except ValueError as e:
         return jsonify({
             'message': e.args[0],
