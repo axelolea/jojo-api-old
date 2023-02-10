@@ -78,8 +78,8 @@ class Image(db.Model):
     id = Column(Integer, primary_key=True, unique=True, autoincrement=True)
     full_body = Column(Text)
     half_body = Column(Text, nullable = False)
-
-    # One to one relationship 
+    type_image = Column(String(30), nullable = False)
+    # One to one relationship
 
     characters_r = db.relationship('Character', back_populates = 'images_r')
     stands_r = db.relationship('Stand', back_populates = 'images_r')
@@ -152,6 +152,7 @@ class Stats(db.Model):
 
     def __repr__(self) -> str:
         return format_repr('Stats', self.stand_id)
+
 
 
 # Format class __repr__
