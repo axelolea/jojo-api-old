@@ -14,19 +14,16 @@ def get_response(code, **args):
     data = args.get('data')
     e = args.get('e')
     pagination = args.get('pagination')
-    
     response = {
-        'status': code,
+        'status': code
     }
-
     if data:
-        response['data'] = data,
+        response['data'] = data
     if pagination:
-        response['message'] = pagination,
+        response['message'] = pagination
     if args.get('msg'):
-        response['message'] = args.get('msg'),
+        response['message'] = args.get('msg')
     if e:
         response['type'] = type(e).__name__
         response['error'] = e.args[0]
-
     return jsonify(response), code

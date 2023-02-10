@@ -1,6 +1,5 @@
 from schema import Schema, Optional, Or, And, Regex, Use
 from src.constants.default_values import (
-    STATS_NAMES,
     STATS_VALUES,
     PARTS_IN_JOJOS,
     URL_REGEX,
@@ -126,18 +125,9 @@ def validate_stand_params(params):
                 lambda x : [
                     i for i in x.split(',') if i.isdigit()
                 ]
-            ),
-            list,
-            len
-        ),
-        Optional('battlecry'): And(
-            str,
-            lambda x : len(x) <= 100
-        ),
-        Optional('abilities'): And(
-            str,
-            lambda x : len(x) <= 100
-        ),
+            ),list,len),
+        Optional('battlecry'): And(str,lambda x : len(x) <= 100),
+        Optional('abilities'): And(str,lambda x : len(x) <= 100),
         Optional(Or(
             'power',
             'speed',
@@ -162,3 +152,22 @@ def validate_pagination(params):
         ),
    })
    return params_schema.validate(dict(params))
+
+def validate_images(data):
+    images_update_schema = Schema({
+        Optional('half_body'): And(str, Regex(URL_REGEX)),
+        Optional('full_body'): And(str, Regex(URL_REGEX)),
+    })
+    return images_update_schema.validate(dict(data))
+
+def country_validator(data):
+    country_schema = Schema({
+        'name': And(
+            Use(str.upper),
+            lambda x : len(x) <= 50
+        ),
+        'code': And(
+            Use(str.upper),
+            lambda x: len(x) == 2 and x.isalpha())
+    })
+    return country_schema.validate(dict(data))

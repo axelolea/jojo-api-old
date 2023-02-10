@@ -2,14 +2,14 @@
 
 def list_images(item):
     return {
+        'id': item.id,
         'half_body': item.half_body,
-        'full_body': item.full_body
+        'full_body': item.full_body,
     }
 
 
 def list_part(item):
     return {
-        'id': item.id,
         'name': item.name,
         'number': item.number,
         'japanese_name': item.japanese_name,
@@ -80,7 +80,7 @@ def list_characters(item):
 
 def list_country(item):
     return {
-        'country_id': item.id,
+        'id': item.id,
         'country_name': item.country_name,
         'country_code': item.country_code
     }
