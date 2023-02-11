@@ -8,3 +8,4 @@ migrations
 *.pyc
 /static_data/
 requirements.txt
+scrap_links.txt

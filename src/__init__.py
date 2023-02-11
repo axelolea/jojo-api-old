@@ -12,6 +12,19 @@ from src.routes.parts import parts
 from src.routes.countries import countries
 from src.routes.images import images
 
+from flask_swagger_ui import get_swaggerui_blueprint
+
+SWAGGER_URL = '/api/v1/docs'
+API_URL = '/static/swagger.json'
+
+swaggerur_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config = {
+        'app_name': 'JoJo\' API'
+    }
+)
+
 def create_app(test_config = None):
 
     app = Flask(__name__, instance_relative_config=True)
@@ -22,6 +35,10 @@ def create_app(test_config = None):
             SQLALCHEMY_DATABASE_URI = environ.get("SQLALCHEMY_DB_URI"),
             SQLALCHEMY_TRACK_MODIFICATIONS = False,
             JWT_SECRET_KEY = environ.get('JWT_SECRET_KEY'),
+            SWAGGER = {
+                'title': 'JoJo\'s API',
+                'uiversion': 3
+            }
         )
     else:
         app.config.from_mapping(test_config)
@@ -37,5 +54,9 @@ def create_app(test_config = None):
     app.register_blueprint(parts)
     app.register_blueprint(countries)
     app.register_blueprint(images)
+
+    # Docs 
+
+    app.register_blueprint(swaggerur_blueprint)
 
     return app

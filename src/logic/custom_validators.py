@@ -156,8 +156,10 @@ def validate_pagination(params):
 
 def validate_images(data):
     images_update_schema = Schema({
-        Optional('half_body'): And(str, Regex(URL_REGEX)),
-        Optional('full_body'): And(str, Regex(URL_REGEX)),
+        Optional(Or(
+            'half_body',
+            'full_body'
+        )): And(str, Regex(URL_REGEX)),
     })
     return images_update_schema.validate(dict(data))
 
