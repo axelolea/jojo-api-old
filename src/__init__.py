@@ -17,6 +17,8 @@ from flask_swagger_ui import get_swaggerui_blueprint
 SWAGGER_URL = '/api/v1/docs'
 API_URL = '/static/swagger.json'
 
+from flask_cors import CORS
+
 swaggerur_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
@@ -48,6 +50,8 @@ def create_app(test_config = None):
     db.init_app(app)
 
     migrate = Migrate(app, db)
+
+    CORS(app)
 
     app.register_blueprint(characters)
     app.register_blueprint(stands)

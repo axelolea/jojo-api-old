@@ -174,3 +174,27 @@ def country_validator(data):
             lambda x: len(x) == 2 and x.isalpha())
     })
     return country_schema.validate(dict(data))
+
+def part_validator(data):
+    part_schema = Schema({
+        'name': And(
+            str,
+            lambda x : len(x) <= 100
+        ),
+        'number': And(
+            int
+        ),
+        'japanese_name': And(
+            str,
+            lambda x : len(x) <= 100
+        ),
+        'romanization_name': And(
+            str,
+            lambda x : len(x) <= 100
+        ),
+        Optional('alther_name'): And(
+            str,
+            lambda x : len(x) <= 100
+        ),
+    })
+    return part_schema.validate(dict(data))

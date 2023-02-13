@@ -1,11 +1,19 @@
 from flask import Blueprint, jsonify, request
 from src.utils.database import db, Part
-from src.constants.http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from src.constants.http_status_codes import (
+    HTTP_200_OK, 
+    HTTP_201_CREATED,
+    HTTP_400_BAD_REQUEST, 
+    HTTP_404_NOT_FOUND,
+    HTTP_500_INTERNAL_SERVER_ERROR
+)
 from src.logic.list_content import list_part
 
 parts = Blueprint('parts', __name__, url_prefix = '/api/v1/parts')
 
 from src.constants.default_values import get_response
+
+from src.logic.custom_validators import part_validator
 
 @parts.get('')
 def get_parts():
@@ -34,40 +42,34 @@ def get_part_id(id):
 @parts.post('')
 def post_parts():
     try:
-        name = request.get_json().get('name')
-        number = request.get_json().get('number')
-        japanese_name = request.get_json().get('japanese_name')
-        romanization_name = request.get_json().get('romanization_name')
-        alther_name = request.get_json().get('alther_name')
-        if not (name and number and japanese_name and romanization_name):
-            return jsonify({
-                'error': 'Faltan parametros'
-            }), HTTP_400_BAD_REQUEST
-        
-        if not (type(number) == int):
-            raise ValueError('Number is not integer value')
+        body = part_validator(request.json)
+        # name = request.get_json().get('name')
+        # number = request.get_json().get('number')
+        # japanese_name = request.get_json().get('japanese_name')
+        # romanization_name = request.get_json().get('romanization_name')
+        # alther_name = request.get_json().get('alther_name')
 
         part = Part(
-                    name = name,
-                    number = number,
-                    japanese_name = japanese_name,
-                    romanization_name = romanization_name,
-                    alther_name = alther_name
+                    name = body.get('name') ,
+                    number = body.get('number'),
+                    japanese_name = body.get('japanese_name'),
+                    romanization_name = body.get('romanization_name'),
+                    alther_name = body.get('alther_name')
                 )
         db.session.add(part)
         db.session.commit()
     except ValueError as e:
-        return jsonify({
-                'status': 400,
-                'type': type(e).__name__,
-                'message': e.args[0],
-                'error': 'Uno de los parametros es incorrecto',
-            }), HTTP_400_BAD_REQUEST
+        return get_response(
+            HTTP_400_BAD_REQUEST,
+            msg = 'Argumentos invalidos'
+        )
+    except:
+        return get_response(
+            HTTP_500_INTERNAL_SERVER_ERROR
+        ) 
     else:
-        return jsonify({
-            'message': 'Post part created successfully',
-            'data': {
-                'name': part.name,
-                'number': part.number
-            }
-        }), HTTP_201_CREATED
+        return get_response(
+            HTTP_201_CREATED,
+            data = list_part(part),
+            msg = 'Post part created successfully'
+        )

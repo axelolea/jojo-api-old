@@ -12,7 +12,7 @@ countries = Blueprint('countries', __name__, url_prefix = '/api/v1/countries')
 from src.logic.custom_validators import country_validator
 
 @countries.get('')
-def get_parts():
+def get_country():
     countries_data = Country.query.all()
     countries_list = list()
     for item in countries_data:

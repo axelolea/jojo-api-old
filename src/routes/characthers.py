@@ -240,6 +240,5 @@ def query():
             }), HTTP_404_NOT_FOUND
     else:
         return jsonify({
-            'params': params,
             'q': [ list_character_basic(x) for x in q ]
             }), HTTP_200_OK
