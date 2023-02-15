@@ -3,14 +3,14 @@ from os import environ
 from flask_migrate import Migrate
 
 # Database 
-from src.utils.database import db
+from jojo.utils.database import db
 
 # Routes
-from src.routes.characthers import characters
-from src.routes.stands import stands
-from src.routes.parts import parts
-from src.routes.countries import countries
-from src.routes.images import images
+from jojo.routes.characthers import characters
+from jojo.routes.stands import stands
+from jojo.routes.parts import parts
+from jojo.routes.countries import countries
+from jojo.routes.images import images
 
 from flask_swagger_ui import get_swaggerui_blueprint
 

@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from src.utils.database import (
+from jojo.utils.database import (
     db,
     Character,
     Image,
@@ -7,25 +7,25 @@ from src.utils.database import (
     Stand,
     Country
 )
-from src.constants.http_status_codes import (
+from jojo.constants.http_status_codes import (
     HTTP_200_OK,
     HTTP_201_CREATED,
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
     HTTP_500_INTERNAL_SERVER_ERROR
 )
-from src.logic.list_content import (
+from jojo.logic.list_content import (
     list_characters,
     list_pagination,
     list_character_basic
 )
-from src.constants.default_values import (
+from jojo.constants.default_values import (
     get_response
 )
 
-from src.logic.query import query_characters
+from jojo.logic.query import query_characters
 
-from src.logic.custom_validators import (
+from jojo.logic.custom_validators import (
     validate_character,
     validate_character_params,
     validate_pagination

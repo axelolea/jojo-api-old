@@ -1,19 +1,19 @@
 from flask import Blueprint, jsonify, request
-from src.utils.database import db, Part
-from src.constants.http_status_codes import (
+from jojo.utils.database import db, Part
+from jojo.constants.http_status_codes import (
     HTTP_200_OK, 
     HTTP_201_CREATED,
     HTTP_400_BAD_REQUEST, 
     HTTP_404_NOT_FOUND,
     HTTP_500_INTERNAL_SERVER_ERROR
 )
-from src.logic.list_content import list_part
+from jojo.logic.list_content import list_part
 
 parts = Blueprint('parts', __name__, url_prefix = '/api/v1/parts')
 
-from src.constants.default_values import get_response
+from jojo.constants.default_values import get_response
 
-from src.logic.custom_validators import part_validator
+from jojo.logic.custom_validators import part_validator
 
 @parts.get('')
 def get_parts():

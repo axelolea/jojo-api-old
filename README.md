@@ -1,6 +1,6 @@
 # JoJo's API
 
-JoJo's API es un proyecctos realizado en :
+JoJo's API es un proyecctos realizado en:
 
 ![Python](https://img.shields.io/static/v1?style=for-the-badge&message=Python&color=3776AB&logo=Python&logoColor=FFFFFF&label=)
 
@@ -8,7 +8,7 @@ Con el micro-framework:
 
 ![Flask](https://img.shields.io/static/v1?style=for-the-badge&message=Flask&color=000000&logo=Flask&logoColor=FFFFFF&label=)
 
-## Requirements
+## Requisitos
 
 Para correr la aplicacion es nesesario tener:
 
@@ -23,58 +23,80 @@ Para correr la aplicacion es nesesario tener:
 Nota: Recomiendo crear un entorno virtual ( [venv](https://docs.python.org/3/library/venv.html) ) para usar esta aplicacion.
 
 ### Crear entornor virtual
+- Usar esta comando para crear el entorno virtual dentro del directorio.
+``` bash
+python -m venv ./venv
+```
+`Nota`: En caso de ejecutar el comando en bash/zsh, usar `python3`
+- Activar entorno virtual.
+
 
 Para `Windows`:
 
-- Crear entorno virtual.
-
 ``` bash
-C:\ python -m venv ./venv
+./venv/Scripts/activate.bat
 ```
-
-- Activar entorno virtual.
-
-``` bash
-C:\ ./venv/Scripts/activate.bat
-```
-
 Para `Linux/Mac`:
 
 ``` bash
-$ python3 -m venv ./venv
-```
-- Activar entorno virtual.
-
-
-``` bash
-$ source ./venv/bin/activate
+source ./venv/bin/activate
 ```
 
 ### Instalar dependencias
 
-Usa el gestor de paquetes [pip](https://pip.pypa.io/en/stable/) para instalar todas las dependecias del proyectos con el siguiente comando.
+- Usa el gestor de paquetes [pip](https://pip.pypa.io/en/stable/) para instalar todas las dependecias del proyectos con el siguiente comando.
 
 ``` bash
 pip install -r requirements.txt
 ```
 `Nota`: En caso de usar bash/zsh, usar el comando `pip3`
 
-### Modificar .flaskenv
+## Configuracion
 
+### Archivo .flaskenv
+- Cambiar la URI de la base de datos.
+
+```conf
+# MySQL URI
+export SQLALCHEMY_DB_URI=mysql+pymysql://<user>:<password>@localhost/jojosdb
+
+# SQLite (Default)
+export SQLALCHEMY_DB_URI=sqlite:///jojosdb
+```
+`Nota`: En las etiquetas <user> y <password>. Colocar las crendenciales del usuario de la base de datos (El usuario debe de contar con permisos apra creartablas e insetar data)
+- Cambiar puerto.
+```conf
+export FLASK_RUN_PORT=5000
+```
+
+### Cambiar base de datos SQLite a otra MySQL o MariaDB
+
+- Crear la base de datos con esta linea de comando.
 ``` sql
 CREATE DATABASE jojosdb;
 ```
+`Nota`: Solo si habeis cambiado la URI en el archivo de configuracion, por default se creara una base de datos `SQLite`.
 
+- Para usar la base de datos MySQL es nesesario instalar esta dependencia.
 ```
-// MySQL URI
-export SQLALCHEMY_DB_URI=mysql+pymysql://<user>:<password>@localhost/jojosdb
+pip install pymysql==1.0.2
+```
+`Nota`: Confirme que tenga habilitado en entorno vitual antes creado.
 
-// SQLite
-export SQLALCHEMY_DB_URI=sqlite:///jojosdb
+## Migraciones
+
+### Crear migraciones de los modelos
+- Una vez creada la base de datos (en caso de haber vambiado la URI), ejecutar las siguientes lineas en al terminal con el entorno vitual habilitado para crear las migraciones en la base de datos.
+```bash
+flask db init
+flask db migrate
+flask db upgrade
 ```
+
+## Ejecutar servidor
+
+- Finalmente, ejecutar la aplicacion.
 
 ```bash
-$ flask db init
-$ flask db migrate
-$ flask db upgrade
+flask run
 ```

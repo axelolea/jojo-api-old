@@ -1,14 +1,14 @@
 from flask import Blueprint, request
-from src.utils.database import Image, db
-from src.constants.http_status_codes import (
+from jojo.utils.database import Image, db
+from jojo.constants.http_status_codes import (
     HTTP_200_OK, 
     HTTP_201_CREATED, 
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND
 )
-from src.logic.list_content import list_images
+from jojo.logic.list_content import list_images
 
-from src.constants.default_values import get_response
+from jojo.constants.default_values import get_response
 
 
 images = Blueprint('images', __name__, url_prefix = '/api/v1/images')
@@ -58,7 +58,7 @@ def get_random_image_character():
 
 # <-- Code Update images -->
 
-from src.logic.custom_validators import validate_images
+from jojo.logic.custom_validators import validate_images
 
 
 @images.put('/<int:id>')
