@@ -34,7 +34,7 @@ python -m venv ./venv
 Para `Windows`:
 
 ``` bash
-./venv/Scripts/activate.bat
+.\venv\Scripts\activate.bat
 ```
 Para `Linux/Mac`:
 
@@ -54,6 +54,9 @@ pip install -r requirements.txt
 ## Configuracion
 
 ### Archivo .flaskenv
+
+- Cambiar el nombre del archivo `.flaskenv`
+
 - Cambiar la URI de la base de datos.
 
 ```conf
