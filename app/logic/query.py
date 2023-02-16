@@ -1,5 +1,5 @@
-from jojo.utils.database import Character, Part, Country, Stand, Stats
-from jojo.constants.default_values import STATS_NAMES
+from app.utils.database import Character, Part, Country, Stand, Stats
+from app.constants.default_values import STATS_NAMES
 
 def query_characters(params):
     q = Character.query

@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from jojo.utils.database import (
+from app.utils.database import (
     db,
     Stand, 
     Stats, 
@@ -7,11 +7,11 @@ from jojo.utils.database import (
     Part
 )
 
-from jojo.constants.default_values import (
+from app.constants.default_values import (
     get_response
 )
 
-from jojo.constants.http_status_codes import (
+from app.constants.http_status_codes import (
     HTTP_200_OK,
     HTTP_201_CREATED,
     HTTP_400_BAD_REQUEST,
@@ -19,13 +19,13 @@ from jojo.constants.http_status_codes import (
     HTTP_500_INTERNAL_SERVER_ERROR
 )
 
-from jojo.logic.custom_validators import (
+from app.logic.custom_validators import (
     validate_stand,
     validate_pagination,
     validate_stand_params
 )
 
-from jojo.logic.list_content import (
+from app.logic.list_content import (
     list_images,
     list_pagination,
     list_stand,
@@ -38,7 +38,7 @@ from schema import (
     SchemaWrongKeyError
 )
 
-from jojo.logic.query import query_stands
+from app.logic.query import query_stands
 
 stands = Blueprint('stands', __name__, url_prefix = '/api/v1/stands')
 

@@ -1,15 +1,15 @@
 from flask import Blueprint, jsonify, request
-from jojo.utils.database import db, Country
-from jojo.constants.http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+from app.utils.database import db, Country
+from app.constants.http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 
-from jojo.logic.list_content import list_country
-from jojo.constants.default_values import get_response
+from app.logic.list_content import list_country
+from app.constants.default_values import get_response
 
 from schema import SchemaError
 
 countries = Blueprint('countries', __name__, url_prefix = '/api/v1/countries')
 
-from jojo.logic.custom_validators import country_validator
+from app.logic.custom_validators import country_validator
 
 @countries.get('')
 def get_country():

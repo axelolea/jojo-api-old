@@ -1,5 +1,5 @@
 from schema import Schema, Optional, Or, And, Regex, Use
-from jojo.constants.default_values import (
+from app.constants.default_values import (
     STATS_VALUES,
     PARTS_IN_JOJOS,
     URL_REGEX,

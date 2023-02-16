@@ -1,8 +1,5 @@
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String, Boolean, Text, Table, ForeignKey
 
-# Connection Database
-db = SQLAlchemy()
 
 # Many to many raltion tables 
 

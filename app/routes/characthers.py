@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from jojo.utils.database import (
+from app.utils.database import (
     db,
     Character,
     Image,
@@ -7,25 +7,25 @@ from jojo.utils.database import (
     Stand,
     Country
 )
-from jojo.constants.http_status_codes import (
+from app.constants.http_status_codes import (
     HTTP_200_OK,
     HTTP_201_CREATED,
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
     HTTP_500_INTERNAL_SERVER_ERROR
 )
-from jojo.logic.list_content import (
+from app.logic.list_content import (
     list_characters,
     list_pagination,
     list_character_basic
 )
-from jojo.constants.default_values import (
+from app.constants.default_values import (
     get_response
 )
 
-from jojo.logic.query import query_characters
+from app.logic.query import query_characters
 
-from jojo.logic.custom_validators import (
+from app.logic.custom_validators import (
     validate_character,
     validate_character_params,
     validate_pagination
@@ -242,3 +242,15 @@ def query():
         return jsonify({
             'q': [ list_character_basic(x) for x in q ]
             }), HTTP_200_OK
+    
+# @characters.delete('/<int:id>')
+# def delete_characters():
+#     try:
+#         pass
+#         character_delete = Character.get(id)
+#     except:
+#         pass
+#     else:
+#         return get_response(
+
+#         )
