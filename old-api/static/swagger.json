@@ -1,0 +1,1080 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "JoJo's API",
+    "description": "Esto es una descripcion",
+    "contact": {
+      "email": "axelolea@example.com"
+    },
+    "license": {
+      "name": "Flask",
+      "url": "https://flask.palletsprojects.com/en/2.2.x/license/"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/api/v1"
+    }
+  ],
+  "tags": [
+    {
+      "name": "characters",
+      "description": "Todo sobre los personajes de la serie."
+    },
+    {
+      "name": "stands",
+      "description": "Todo sobre los stands de la serie"
+    },
+    {
+      "name": "images",
+      "description": "Acceso a imagenes y demas funciones"
+    },
+    {
+      "name": "countries",
+      "description": "Listado de paises"
+    },
+    {
+      "name": "parts",
+      "description": "Todo sobre las partes de las serie"
+    }
+  ],
+  "paths": {
+    "/characters": {
+      "get": {
+        "summary": "Obtener lista de personajes",
+        "tags": [
+          "characters"
+        ],
+        "description": "Listado de personajes enpaginados",
+        "operationId": "getCharacters",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/pagination_page"
+          },
+          {
+            "$ref": "#/components/parameters/pagination_per_page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/charactersPagination"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear un nuevo personaje",
+        "tags": [
+          "characters"
+        ],
+        "description": "Crear un nuevo personaje en la base de datos",
+        "requestBody": {
+          "required": true,
+          "description": "Crear new character, favor de crear el body con el formato especificado",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/characterBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/dataCharacter"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/characters/{id}": {
+      "get": {
+        "summary": "Returns a character by ID.",
+        "tags": [
+          "characters"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/dataCharacter"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/characters/query": {
+      "get": {
+        "summary": "Returns a characters with params is filter.",
+        "tags": [
+          "characters"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/nameQuery"
+          },
+          {
+            "$ref": "#/components/parameters/partsQuery"
+          },
+          {
+            "$ref": "#/components/parameters/countryQuery"
+          },
+          {
+            "$ref": "#/components/parameters/is_hamon_user"
+          },
+          {
+            "$ref": "#/components/parameters/is_stand_user"
+          },
+          {
+            "$ref": "#/components/parameters/is_gyro_user"
+          },
+          {
+            "$ref": "#/components/parameters/living"
+          },
+          {
+            "$ref": "#/components/parameters/is_human"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/queryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stands": {
+      "get": {
+        "summary": "Obtener lista de stands",
+        "tags": [
+          "stands"
+        ],
+        "description": "Listado de stands enpaginados",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/pagination_page"
+          },
+          {
+            "$ref": "#/components/parameters/pagination_per_page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/standsPagination"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear un nuevo stand",
+        "tags": [
+          "stands"
+        ],
+        "description": "Crear un nuevo stand en la base de datos",
+        "requestBody": {
+          "required": true,
+          "description": "Crear new stand, favor de crear el body con el formato especificado",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/standBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/dataStand"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stands/{id}": {
+      "get": {
+        "summary": "Returns a stand by ID.",
+        "tags": [
+          "stands"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/dataStand"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stands/query": {
+      "get": {
+        "summary": "Returns a characters with params is filter.",
+        "tags": [
+          "stands"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/nameQuery"
+          },
+          {
+            "$ref": "#/components/parameters/partsQuery"
+          },
+          {
+            "$ref": "#/components/parameters/battlecry"
+          },
+          {
+            "$ref": "#/components/parameters/abilities"
+          },
+          {
+            "$ref": "#/components/parameters/power"
+          },
+          {
+            "$ref": "#/components/parameters/speed"
+          },
+          {
+            "$ref": "#/components/parameters/range"
+          },
+          {
+            "$ref": "#/components/parameters/durability"
+          },
+          {
+            "$ref": "#/components/parameters/precision"
+          },
+          {
+            "$ref": "#/components/parameters/potential"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/queryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/images/{id}": {
+      "get": {
+        "summary": "Returns a images with ID",
+        "tags": [
+          "images"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/imagesData"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Returns a images with ID",
+        "tags": [
+          "images"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/imagesData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/images/random": {
+      "get": {
+        "summary": "Returns a random image",
+        "tags": [
+          "images"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/imagesData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/images/random/character": {
+      "get": {
+        "summary": "Returns a random image in stands set",
+        "tags": [
+          "images"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/imagesData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/images/random/stands": {
+      "get": {
+        "summary": "Returns a random image in stands set",
+        "tags": [
+          "images"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/imagesData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/countries": {
+      "get": {
+        "summary": "Returns a images with ID",
+        "tags": [
+          "countries"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/countryData"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Returns a images with ID",
+        "tags": [
+          "countries"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "hola",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/countryBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/countryList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parts/{id}": {
+      "get": {
+        "summary": "Returns a part with ID",
+        "tags": [
+          "parts"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/partsData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parts": {
+      "get": {
+        "summary": "Returns list with all parts in jojos",
+        "tags": [
+          "parts"
+        ],
+        "responses": {
+          "200": {
+            "description": "List with all jojos parts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/partsList"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Returns a images with ID",
+        "tags": [
+          "parts"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "hola",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/partsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/imagesData"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "NotFound": {
+        "description": "(Not Found) no se encontro los elementos"
+      },
+      "BadRequest": {
+        "description": "(Not Found) no se los datos correctamente"
+      }
+    },
+    "parameters": {
+      "pagination_page": {
+        "name": "page",
+        "in": "query",
+        "description": "Numero de pagina",
+        "schema": {
+          "type": "integer",
+          "default": 1
+        }
+      },
+      "pagination_per_page": {
+        "name": "per_page",
+        "in": "query",
+        "description": "numero de datos por pagina",
+        "schema": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 50,
+          "default": 10
+        }
+      },
+      "id": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "nameQuery": {
+        "name": "name",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "maximum": 100
+        }
+      },
+      "partsQuery": {
+        "name": "parts",
+        "in": "query",
+        "explode": false,
+        "schema": {
+          "$ref": "#/components/schemas/parts"
+        }
+      },
+      "countryQuery": {
+        "name": "country",
+        "in": "query",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "is_hamon_user": {
+        "name": "is_hamon_user",
+        "in": "query",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "is_stand_user": {
+        "name": "is_stand_user",
+        "in": "query",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "is_gyro_user": {
+        "name": "is_gyro_user",
+        "in": "query",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "living": {
+        "name": "living",
+        "in": "query",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "is_human": {
+        "name": "is_human",
+        "in": "query",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "battlecry": {
+        "name": "battlecry",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "maximum": 100
+        }
+      },
+      "abilities": {
+        "name": "abilities",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "maximum": 100
+        }
+      },
+      "power": {
+        "name": "power",
+        "in": "query",
+        "schema": {
+          "$ref": "#/components/schemas/statsValue"
+        }
+      },
+      "speed": {
+        "name": "speed",
+        "in": "query",
+        "schema": {
+          "$ref": "#/components/schemas/statsValue"
+        }
+      },
+      "range": {
+        "name": "range",
+        "in": "query",
+        "schema": {
+          "$ref": "#/components/schemas/statsValue"
+        }
+      },
+      "durability": {
+        "name": "durability",
+        "in": "query",
+        "schema": {
+          "$ref": "#/components/schemas/statsValue"
+        }
+      },
+      "precision": {
+        "name": "precision",
+        "in": "query",
+        "schema": {
+          "$ref": "#/components/schemas/statsValue"
+        }
+      },
+      "potential": {
+        "name": "potential",
+        "in": "query",
+        "schema": {
+          "$ref": "#/components/schemas/statsValue"
+        }
+      }
+    },
+    "schemas": {
+      "pagionationSchema": {
+        "type": "object",
+        "description": "Detallas de la paginacion",
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "pages": {
+            "type": "integer"
+          },
+          "total_count": {
+            "type": "integer"
+          },
+          "prev": {
+            "type": "boolean"
+          },
+          "next": {
+            "type": "boolean"
+          },
+          "has_prev": {
+            "type": "boolean"
+          },
+          "has_next": {
+            "type": "boolean"
+          }
+        }
+      },
+      "imagesSchema": {
+        "type": "object",
+        "properties": {
+          "full_body": {
+            "type": "string"
+          },
+          "half_body": {
+            "type": "string"
+          }
+        }
+      },
+      "listItemsBasic": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "japanese_name": {
+            "type": "string"
+          },
+          "images": {
+            "$ref": "#/components/schemas/imagesSchema"
+          }
+        }
+      },
+      "characterBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maximum": 100
+          },
+          "japanese_name": {
+            "type": "string",
+            "maximum": 100
+          },
+          "parts": {
+            "$ref": "#/components/schemas/parts"
+          },
+          "alther_name": {
+            "type": "string",
+            "maximum": 100
+          },
+          "catchphrase": {
+            "type": "string",
+            "maximum": 200
+          },
+          "country": {
+            "oneOf": [
+              {
+                "type": "string",
+                "maxLength": 2,
+                "minLength": 2
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          },
+          "is_hamon_user": {
+            "type": "boolean",
+            "default": false
+          },
+          "is_stand_user": {
+            "type": "boolean",
+            "default": false
+          },
+          "is_gyro_user": {
+            "type": "boolean",
+            "default": false
+          },
+          "living": {
+            "type": "boolean",
+            "default": true
+          },
+          "is_human": {
+            "type": "boolean",
+            "default": true
+          },
+          "images": {
+            "$ref": "#/components/schemas/imagesSchema"
+          },
+          "stands": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "japanese_name",
+          "parts"
+        ]
+      },
+      "charactersPagination": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "Personajes en listados",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/listItemsBasic"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/pagionationSchema"
+          }
+        }
+      },
+      "standsPagination": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "Personajes en listados",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/listItemsBasic"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/pagionationSchema"
+          }
+        }
+      },
+      "dataCharacter": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/characterBody"
+          }
+        }
+      },
+      "dataStand": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/standBody"
+          }
+        }
+      },
+      "queryResponse": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/listItemsBasic"
+            }
+          }
+        }
+      },
+      "standBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maximum": 100
+          },
+          "japanese_name": {
+            "type": "string",
+            "maximum": 100
+          },
+          "abilities": {
+            "type": "string"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/stats"
+          },
+          "parts": {
+            "$ref": "#/components/schemas/parts"
+          },
+          "alther_name": {
+            "type": "string",
+            "maximum": 100
+          },
+          "battlecry": {
+            "type": "string",
+            "maximum": 120
+          },
+          "images": {
+            "$ref": "#/components/schemas/imagesSchema"
+          }
+        },
+        "required": [
+          "name",
+          "japanese_name",
+          "parts",
+          "abilities",
+          "stats"
+        ]
+      },
+      "imagesData": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/imagesSchema"
+          }
+        }
+      },
+      "statsValue": {
+        "type": "string",
+        "enum": [
+          "NULL",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "INFINITE",
+          "?"
+        ]
+      },
+      "stats": {
+        "type": "object",
+        "properties": {
+          "power": {
+            "$ref": "#/components/schemas/statsValue"
+          },
+          "speed": {
+            "$ref": "#/components/schemas/statsValue"
+          },
+          "range": {
+            "$ref": "#/components/schemas/statsValue"
+          },
+          "durability": {
+            "$ref": "#/components/schemas/statsValue"
+          },
+          "precision": {
+            "$ref": "#/components/schemas/statsValue"
+          },
+          "potential": {
+            "$ref": "#/components/schemas/statsValue"
+          }
+        },
+        "required": [
+          "power",
+          "speed",
+          "range",
+          "durability",
+          "precision",
+          "potential"
+        ]
+      },
+      "parts": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "uniqueItems": true
+        }
+      },
+      "partsBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maximum": 100
+          },
+          "number": {
+            "type": "integer"
+          },
+          "japanese_name": {
+            "type": "string",
+            "maximum": 100
+          },
+          "romanization_name": {
+            "type": "string",
+            "maximum": 100
+          },
+          "alther_name": {
+            "type": "string",
+            "maximum": 100
+          }
+        },
+        "required": [
+          "name",
+          "number",
+          "japanese_name",
+          "romanization_name"
+        ]
+      },
+      "partsData": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/partsBody"
+          }
+        }
+      },
+      "countryBody": {
+        "type": "object",
+        "properties": {
+          "country_name": {
+            "type": "string"
+          },
+          "country_code": {
+            "type": "string"
+          }
+        }
+      },
+      "countryData": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/countryBody"
+          }
+        }
+      },
+      "countryList": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/countryBody"
+            }
+          }
+        }
+      },
+      "partsList": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/partsBody"
+            }
+          }
+        }
+      }
+    }
+  }
+}
